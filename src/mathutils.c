@@ -104,6 +104,33 @@ void vecPerpendicular(guVector* vec, guVector* out) {
 	}
 }
 
+inline guVector Vector(f32 x, f32 y, f32 z) {
+	guVector res = { x, y, z };
+	return res;
+}
+
+guVector RandomVectorInHemisphere(guVector* normal) {
+	// Jacco Bikker
+	// Altered by Martijn Gerkes
+	guVector T, B, N;
+	N = *normal;
+	vecPerpendicular(normal, &T);
+	guVecCross(&T, normal, &B);
+
+	f32 r1 = FncMtRandR32() * 2.0f - 1.0f;
+	f32 r2 = FncMtRandR32() * 2.0f - 1.0f;
+
+	guVecScale(&T, &T, r1);
+	guVecScale(&B, &B, r2);
+	guVecAdd(&T, &B, &B);
+	guVecSub(&B, &N, &N);
+	guVecNormalize(&N);
+	guVecScale(&N, &N, -1.0f);
+
+	return N;
+}
+
+/*
 guVector RandomVectorInHemisphere(guVector* normal) {
 	// Jacco Bikker
 	// Altered by Martijn Gerkes
@@ -127,4 +154,17 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 	guVecScale(&N, &N, -1.0f);
 
 	return N;
+}
+*/
+
+void guVecMax(guVector* vector, f32 max) {
+	vector->x = vector->x > max ? max : vector->x;
+	vector->y = vector->y > max ? max : vector->y;
+	vector->z = vector->z > max ? max : vector->z;
+}
+
+void guVecMin(guVector* vector, f32 min) {
+	vector->x = vector->x < min ? min : vector->x;
+	vector->y = vector->y < min ? min : vector->y;
+	vector->z = vector->z < min ? min : vector->z;
 }

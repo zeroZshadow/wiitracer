@@ -4,6 +4,7 @@
 #define MAXDEPTH 4
 
 #include <gccore.h>
+#include "scene.h"
 #include "camera.h"
 #include "ray.h"
 
@@ -26,8 +27,8 @@ void PATH_destroy(pathtracer_t* tracer);
 
 void PATH_generateRays(pathtracer_t* tracer);
 
-void PATH_draw(pathtracer_t* tracer);
+void PATH_draw(pathtracer_t* tracer, scene_t* scene);
 
-GXColor PATH_trace(raypath_t* path);
+GXColor PATH_trace(raypath_t* path, scene_t* scene);
 
 #endif

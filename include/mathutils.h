@@ -93,6 +93,12 @@ void vecPerpendicular(guVector* vec, guVector* out);
 
 guVector RandomVectorInHemisphere(guVector* normal);
 
+inline guVector Vector(f32 x, f32 y, f32 z);
+
+void guVecMax(guVector* vector, f32 max);
+
+void guVecMin(guVector* vector, f32 min);
+
 #endif
 
 

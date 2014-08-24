@@ -63,10 +63,13 @@
     <ClCompile Include="src\camera.c" />
     <ClCompile Include="src\gxutils.c" />
     <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\material.c" />
     <ClCompile Include="src\mathutils.c" />
     <ClCompile Include="src\mtrand.c" />
     <ClCompile Include="src\pathtracer.c" />
     <ClCompile Include="src\raycast.c" />
+    <ClCompile Include="src\scene.c" />
+    <ClCompile Include="src\sphere.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -78,11 +81,15 @@
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\defines.h" />
     <ClInclude Include="include\gxutils.h" />
+    <ClInclude Include="include\hitinfo.h" />
+    <ClInclude Include="include\material.h" />
     <ClInclude Include="include\mathutils.h" />
     <ClInclude Include="include\mtrand.h" />
     <ClInclude Include="include\pathtracer.h" />
     <ClInclude Include="include\ray.h" />
     <ClInclude Include="include\raycast.h" />
+    <ClInclude Include="include\scene.h" />
+    <ClInclude Include="include\sphere.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

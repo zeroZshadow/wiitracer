@@ -48,8 +48,8 @@ void PATH_generateRays(pathtracer_t* tracer) {
 
 	u32 i = 0;
 	u16 x, y, ix, iy;
-	for (y = 0; y<RayVCount; y += TILESIZE) {
-		for (x = 0; x<RayHCount; x += TILESIZE) {
+	for (y = 0; y < RayVCount; y += TILESIZE) {
+		for (x = 0; x < RayHCount; x += TILESIZE) {
 			//This is a single tile
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
@@ -73,7 +73,7 @@ void PATH_generateRays(pathtracer_t* tracer) {
 	}
 }
 
-void PATH_draw(pathtracer_t* tracer) {
+void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	tracer->pass++;
 	tracer->RCP_pass = 1.0f / (f32)tracer->pass;
 
@@ -84,15 +84,15 @@ void PATH_draw(pathtracer_t* tracer) {
 
 	u16 x, y, ix, iy;
 	u32 i = 0;
-	for (y = 0; y<RayVCount; y += TILESIZE) {
-		for (x = 0; x<RayHCount; x += TILESIZE) {
+	for (y = 0; y < RayVCount; y += TILESIZE) {
+		for (x = 0; x < RayHCount; x += TILESIZE) {
 			//This is a single tile
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					raypath_t* path = &tracer->raypaths[i];
-					path->depth = 0;
+					//path->depth = 0;
 
-					tile[ix + (iy * TILESIZE)] = PATH_trace(path);
+					tile[ix + (iy * TILESIZE)] = PATH_trace(path, scene);
 
 					// Set pixel color
 					++i;
@@ -105,25 +105,51 @@ void PATH_draw(pathtracer_t* tracer) {
 	}
 }
 
-GXColor PATH_trace(raypath_t* path) {
-	GXColor color = { 0xFF, 0xFF, 0xFF, 0xFF };
-	guVector origin = path->base.origin;
-	guVector direction = path->base.direction;
+GXColor PATH_trace(raypath_t* path, scene_t* scene) {
+	guVector color = { 1, 1, 1 };
+	GXColor black = { 0xFF, 0x00, 0x00, 0x00 };
+	ray_t currentRay;
+	currentRay.origin = path->base.origin;
+	currentRay.direction = path->base.direction;
 
 	u8 depth;
 	for (depth = 0; depth < MAXDEPTH; ++depth) {
-		//raycast from origin
-		//no hit, black, out
-		//hit, color info, emissive?
-		//generate new ray
-		guVector hitnormal;
+		u8 i;
+		BOOL hit = FALSE;
+		hitinfo_t hitinfo;
+		for (i = 0; i < scene->spherecount; ++i) {
+			hitinfo_t temphit;
+			if (SPHERE_raycast(&scene->spheres[i], &currentRay, &temphit)) {
+				// Hit
+				hit = TRUE;
+			}
+		}
 
-		direction = RandomVectorInHemisphere(&hitnormal);
+		if (hit == FALSE) {
+			//Nothing was hit, eary out
+			return black;
+		}
 
+		// Alter the current color
+		f32 cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
+		guVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
 
-		//multiply last hit color with current hit color
-		//If it was emissive, exit
+		color.x *= hitinfo.material.color.x;
+		color.y *= hitinfo.material.color.y;
+		color.z *= hitinfo.material.color.z;
+
+		if (hitinfo.material.emissive > 0.0f) {
+			guVecScale(&color, &color, hitinfo.material.emissive * 255.f * cost);
+			guVecMax(&color, 0xFF);
+			guVecMin(&color, 0);
+			GXColor result = { 0xFF, color.x, color.y, color.z };
+			return result;
+		}
+
+		//TODO: Holy shit this is slow
+		currentRay.direction = RandomVectorInHemisphere(&hitinfo.normal);
+		currentRay.origin = hitinfo.position;
 	}
 
-	return color;
+	return black;
 }

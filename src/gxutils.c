@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include <stdio.h>
 
+#include "mathutils.h"
 
 #define DEFAULT_FIFO_SIZE	(256*1024)
 void *xfb[2] = { NULL, NULL };
@@ -100,7 +101,7 @@ void GXU_createPixelBuffer(u16 width, u16 height) {
 		printf("failed to alloc screenBuffer");
 		return;
 	}
-	
+
 	GX_InitTexObj(screenTexObject, screenBuffer, width, height, GX_TF_RGBA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
 	GX_InitTexObjFilterMode(screenTexObject, GX_LINEAR, GX_LINEAR);
 }
@@ -109,21 +110,19 @@ void GXU_clearPixelBuffer(u32 color) {
 	u32 x, y, ix, iy;
 	u16* colorBuffer = screenBuffer;
 	u32 index = 0;
+	const u32 looplength = TILESIZE * TILESIZE;
 
 	GX_InvalidateTexAll();
 
-	for (y = 0; y<screenHeight; y += TILESIZE) {
-		for (x = 0; x<screenWidth; x += TILESIZE) {
-			for (iy = 0; iy<TILESIZE; ++iy) {
-				for (ix = 0; ix<TILESIZE; ++ix) {
+	for (y = 0; y < screenHeight; y += TILESIZE) {
+		for (x = 0; x < screenWidth; x += TILESIZE) {
+			for (iy = 0; iy < TILESIZE; ++iy) {
+				for (ix = 0; ix < TILESIZE; ++ix) {
 					u16 arcolor = (color) >> 16; // Alpha | Red
-					colorBuffer[index++] = arcolor;
-				}
-			}
-			for (iy = 0; iy<TILESIZE; ++iy) {
-				for (ix = 0; ix<TILESIZE; ++ix) {
 					u16 gbcolor = (color & 0x0000FFFF); //Green | Blue
-					colorBuffer[index++] = gbcolor;
+					colorBuffer[index] = arcolor;
+					colorBuffer[index + looplength] = gbcolor;
+					index++;
 				}
 			}
 		}
@@ -135,25 +134,22 @@ u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley) {
 	u16* colorBuffer = screenBuffer;
 
 	const u32 widthtiles = screenWidth / TILESIZE;
-	u32 index = (tilex + (tiley * widthtiles)) * (TILESIZE*TILESIZE) << 1;
+	const u32 looplength = TILESIZE * TILESIZE;
+	u32 index = (tilex + (tiley * widthtiles)) * (looplength) << 1;
 	GX_InvalidateTexAll();
 
-	for (iy = 0; iy<TILESIZE; ++iy) {
-		for (ix = 0; ix<TILESIZE; ++ix) {
+	for (iy = 0; iy < TILESIZE; ++iy) {
+		for (ix = 0; ix < TILESIZE; ++ix) {
 			u32 color = tileData[ix + (iy * TILESIZE)];
 			u16 arcolor = (color) >> 16; // Alpha | Red
-			colorBuffer[index++] = arcolor;
-		}
-	}
-	for (iy = 0; iy<TILESIZE; ++iy) {
-		for (ix = 0; ix<TILESIZE; ++ix) {
-			u32 color = tileData[ix + (iy * TILESIZE)];
 			u16 gbcolor = color; //Green | Blue
-			colorBuffer[index++] = gbcolor;
+			colorBuffer[index] = arcolor;
+			colorBuffer[index + looplength] = gbcolor;
+			index++;
 		}
 	}
 
-	return index;
+	return index + TILESIZE * TILESIZE;
 }
 
 void GXU_renderPixelBuffer() {
@@ -168,17 +164,17 @@ void GXU_renderPixelBuffer() {
 	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
 
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);	// Draw A Quad
-		GX_Position2f32(0, 0);	// Top Left
-		GX_TexCoord2f32(0, 0);
+	GX_Position2f32(0, 0);	// Top Left
+	GX_TexCoord2f32(0, 0);
 
-		GX_Position2f32(1, 0);	// Top Right
-		GX_TexCoord2f32(1, 0);
+	GX_Position2f32(1, 0);	// Top Right
+	GX_TexCoord2f32(1, 0);
 
-		GX_Position2f32(1, 1);	// Bottom Right
-		GX_TexCoord2f32(1, 1);
+	GX_Position2f32(1, 1);	// Bottom Right
+	GX_TexCoord2f32(1, 1);
 
-		GX_Position2f32(0, 1);	// Bottom Left
-		GX_TexCoord2f32(0, 1);
+	GX_Position2f32(0, 1);	// Bottom Left
+	GX_TexCoord2f32(0, 1);
 	GX_End();
 }
 
@@ -214,11 +210,8 @@ guVector GXU_blendColors(guVector c1, guVector c2, f32 blend) {
 }
 
 GXColor GXU_vectorToColorData(guVector color) {
-	GXColor res = {
-		0xFF,
-		color.x * 0xFF,
-		color.y * 0xFF,
-		color.z * 0xFF,
-	};
+	guVector mul = { 0xFF, 0xFF, 0xFF };
+	ps_float3Mul(&color, &mul, &mul);
+	GXColor res = { 0xFF, mul.x, mul.y, mul.z, };
 	return res;
 }

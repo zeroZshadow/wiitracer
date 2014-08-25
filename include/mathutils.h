@@ -31,6 +31,14 @@ void AxisAngleToQuaternion(guQuaternion* q, guVector rAxis, const f32 rAngle);
  */
 inline void ps_float2Mul(f32* opA, f32* opB, f32* result);
 
+/*! \brief Multiplies all the elements of a vector with another one
+ *         (x1*x2, y1*y2, z1*z2)
+ *  \param[in] vec1 First vector
+ *  \param[in] vec2 Second vector
+ *  \param[out] result Result vector 
+ */
+inline void ps_float3Mul(guVector* vec1, guVector* vec2, guVector* out);
+
 /*! \brief ASM part of EulerToQuaternion, don't use alone!
  *  \param[in] x Sin/Cos of Euler X
  *  \param[in] y Sin/Cos of Euler Y
@@ -100,6 +108,9 @@ inline guVector Vector(f32 x, f32 y, f32 z);
 void guVecMax(guVector* vector, f32 max);
 
 void guVecMin(guVector* vector, f32 min);
+
+void ps_vecAbs(guVector* vec, guVector* out);
+void ps_randScale(guVector* vec1, guVector* vec2, f32* rand, f32* mad);
 
 #endif
 

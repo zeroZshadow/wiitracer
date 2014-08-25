@@ -8,15 +8,20 @@
 #include "mathutils.h"
 #include "scene.h"
 
+BOOL isRunning;
+void OnResetCalled();
+
 int main(int argc, char **argv) {
+	SYS_SetResetCallback(OnResetCalled);
+
 	FncMtSrand(time(NULL));
 
 	// Initialize graphics
 	GXU_init();
 
 	// Frame buffer
-	u16 renderWidth = rmode->viWidth >> 1;
-	u16 renderHeight = rmode->viHeight >> 1;
+	u16 renderWidth = rmode->viWidth >> 0;
+	u16 renderHeight = rmode->viHeight >> 0;
 	printf("starting %u %u", renderWidth, renderHeight);
 	GXU_createPixelBuffer(renderWidth, renderHeight);
 	GXU_clearPixelBuffer(0xFFFF00FF);
@@ -63,8 +68,8 @@ int main(int argc, char **argv) {
 	// Initialize camera and generate initial rays
 	CAM_init(&tracer->camera, tracer->width, tracer->height);
 
-	while (1) {
-		if (SYS_ResetButtonDown()) return 0;
+	isRunning = TRUE;
+	while (isRunning) {
 
 		//Pathtrace scene
 		PATH_generateRays(tracer);
@@ -79,4 +84,8 @@ int main(int argc, char **argv) {
 	PATH_destroy(tracer);
 
 	return 0;
+}
+
+void OnResetCalled() {
+	isRunning = FALSE;
 }

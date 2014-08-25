@@ -9,6 +9,19 @@ ps_float2Mul:
 	psq_st fr1, 0(r5), 0, 0
 	blr
 
+	.globl ps_float3Mul
+	// r3 = vec1, r4 = vec2, r5 = out
+ps_float3Mul:
+	psq_l fr1, 0(r3), 0, 0
+	psq_l fr2, 8(r3), 1, 0
+	psq_l fr3, 0(r4), 0, 0
+	psq_l fr4, 8(r4), 1, 0
+	ps_mul fr1, fr1, fr3
+	ps_mul fr2, fr2, fr4
+	psq_st fr1, 0(r5), 0, 0
+	psq_st fr2, 8(r5), 1, 0
+	blr
+
 	.globl ps_eulerQuat
 	// r3 = x, r4 = y, r5 = z, r6 = out
 ps_eulerQuat:

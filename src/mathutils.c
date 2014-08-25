@@ -115,7 +115,7 @@ inline guVector Vector(f32 x, f32 y, f32 z) {
 inline f32 fioraRand() {
 	static u32 val = 0xDEADBEEF;
 	val = 214013 * val + 2531011;
-	u32 temp = (val & 0x007FFFFF) | 0x3F800000;
+	const u32 temp = (val & 0x007FFFFF) | 0x3F800000;
 	return *(f32*)&temp - 1.0f;
 }
 

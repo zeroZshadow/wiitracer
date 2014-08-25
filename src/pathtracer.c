@@ -101,7 +101,7 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	const u32 RayVCount = tracer->vrayCount;
 	GXColor datatile[TILESIZE*TILESIZE];
 
-	f32 blendvalue = tracer->pass / (f32)(tracer->pass + 1);
+	const f32 blendvalue = tracer->pass / (f32)(tracer->pass + 1);
 
 	u16 x, y, ix, iy;
 	u32 i = 0;
@@ -113,7 +113,7 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 					raypath_t* path = &tracer->raypaths[i];
 
 					//Get pixel color for tile
-					guVector color = PATH_trace(path, scene);
+					const guVector color = PATH_trace(path, scene);
 
 					//Blend with old pixel
 					const u32 index = (x + ix) + ((y + iy) * RayHCount);
@@ -122,7 +122,7 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 					tracer->fbuffer[index] = pixel = GXU_blendColors(color, pixel, blendvalue);
 
 					//Convert to u32
-					guVecMax(&pixel, 0.9999999999f);
+					guVecMax(&pixel, 1.0f);
 					guVecMin(&pixel, 0.0f);
 					datatile[ix + (iy * TILESIZE)] = GXU_vectorToColorData(pixel);
 					++i;
@@ -148,7 +148,7 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 	guVector color = { 1, 1, 1 };
 	const guVector black = { 0, 0, 0 };
 	ray_t currentRay;
-	//f32 cost = 1.0f;
+	f32 cost = 1.0f;
 	currentRay.origin = path->base.origin;
 	currentRay.direction = path->base.direction;
 
@@ -158,7 +158,6 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 		hitinfo_t hitinfo;
 		hitinfo.distance = INFINITY;
 		hitinfo.hit = FALSE;
-
 
 		for (i = 0; i < scene->spherecount; ++i) {
 			SPHERE_raycast(&scene->spheres[i], &currentRay, &hitinfo, callback);
@@ -173,8 +172,7 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 		}
 
 		// Alter the current color
-		//guVecScale(&hitinfo.material.color, &hitinfo.material.color, 1); //cost
-
+		guVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
 		ps_float3Mul(&color, &hitinfo.material.color, &color);
 
 		if (hitinfo.material.emissive > 0.0f) {
@@ -182,12 +180,12 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 			return color;
 		}
 
-		//Calculate cost of next color
-		//cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
-
 		//TODO: Holy shit this is slow
 		currentRay.direction = RandomVectorInHemisphere(&hitinfo.normal);
 		currentRay.origin = hitinfo.position;
+
+		//Calculate cost of next color
+		cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
 	}
 
 	return black;

@@ -34,6 +34,12 @@
     <Filter Include="Header Files\scene\primitive">
       <UniqueIdentifier>{ad87da2d-6586-4863-8f5b-02dbb60ac880}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\profiler">
+      <UniqueIdentifier>{d15617f2-2e3d-48db-a6e8-21bd3a4aee06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\profiler">
+      <UniqueIdentifier>{e9e2e083-1973-4992-b0d1-3fca435f58d9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -68,6 +74,12 @@
     </ClCompile>
     <ClCompile Include="src\plane.c">
       <Filter>Source Files\scene\primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="src\profiler.c">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timer.c">
+      <Filter>Source Files\profiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +123,15 @@
     </ClInclude>
     <ClInclude Include="include\plane.h">
       <Filter>Header Files\scene\primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="include\profiler.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="include\timer.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="include\types.h">
+      <Filter>Header Files\profiler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

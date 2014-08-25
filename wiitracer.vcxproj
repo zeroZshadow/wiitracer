@@ -68,8 +68,10 @@
     <ClCompile Include="src\mtrand.c" />
     <ClCompile Include="src\pathtracer.c" />
     <ClCompile Include="src\plane.c" />
+    <ClCompile Include="src\profiler.c" />
     <ClCompile Include="src\scene.c" />
     <ClCompile Include="src\sphere.c" />
+    <ClCompile Include="src\timer.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -87,9 +89,12 @@
     <ClInclude Include="include\mtrand.h" />
     <ClInclude Include="include\pathtracer.h" />
     <ClInclude Include="include\plane.h" />
+    <ClInclude Include="include\profiler.h" />
     <ClInclude Include="include\ray.h" />
     <ClInclude Include="include\scene.h" />
     <ClInclude Include="include\sphere.h" />
+    <ClInclude Include="include\timer.h" />
+    <ClInclude Include="include\types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

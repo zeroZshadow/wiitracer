@@ -21,11 +21,6 @@
 	OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#define GAMECUBE
-//#define WII
-//#define IPHONE
-//#define PSP
-
 #include <stdio.h>
 #include "types.h"
 #include "timer.h"

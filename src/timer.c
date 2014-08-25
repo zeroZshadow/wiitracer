@@ -27,8 +27,6 @@
 // This function is independant on target platform
 // Currently only Wii and Gamecube is supported, both which are 32bit.
 
-//#ifdef GAMECUBE
-//#ifdef WII
 u64 timer_gettime()
 {
 	u32 tb_upper;

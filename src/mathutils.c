@@ -127,7 +127,7 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 	vecPerpendicular(normal, &T);
 	guVecCross(&T, normal, &B);
 
-	f32 rand[2] = { FncMtRandR32(), FncMtRandR32() };
+	f32 rand[2] = { fioraRand(), fioraRand() };
 	f32 mad[2] = { 2.0f, -1.0f };
 
 	ps_randScale(&T, &B, rand, mad);

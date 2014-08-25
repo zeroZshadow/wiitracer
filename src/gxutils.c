@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include <stdio.h>
 
+#include "mathutils.h"
 
 #define DEFAULT_FIFO_SIZE	(256*1024)
 void *xfb[2] = { NULL, NULL };
@@ -109,6 +110,7 @@ void GXU_clearPixelBuffer(u32 color) {
 	u32 x, y, ix, iy;
 	u16* colorBuffer = screenBuffer;
 	u32 index = 0;
+	const u32 looplength = TILESIZE * TILESIZE;
 
 	GX_InvalidateTexAll();
 
@@ -117,13 +119,10 @@ void GXU_clearPixelBuffer(u32 color) {
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					u16 arcolor = (color) >> 16; // Alpha | Red
-					colorBuffer[index++] = arcolor;
-				}
-			}
-			for (iy = 0; iy < TILESIZE; ++iy) {
-				for (ix = 0; ix < TILESIZE; ++ix) {
 					u16 gbcolor = (color & 0x0000FFFF); //Green | Blue
-					colorBuffer[index++] = gbcolor;
+					colorBuffer[index] = arcolor;
+					colorBuffer[index + looplength] = gbcolor;
+					index++;
 				}
 			}
 		}
@@ -135,7 +134,8 @@ u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley) {
 	u16* colorBuffer = screenBuffer;
 
 	const u32 widthtiles = screenWidth / TILESIZE;
-	u32 index = (tilex + (tiley * widthtiles)) * (TILESIZE*TILESIZE) << 1;
+	const u32 looplength = TILESIZE * TILESIZE;
+	u32 index = (tilex + (tiley * widthtiles)) * (looplength) << 1;
 	GX_InvalidateTexAll();
 
 	for (iy = 0; iy < TILESIZE; ++iy) {
@@ -144,7 +144,7 @@ u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley) {
 			u16 arcolor = (color) >> 16; // Alpha | Red
 			u16 gbcolor = color; //Green | Blue
 			colorBuffer[index] = arcolor;
-			colorBuffer[index + TILESIZE * TILESIZE] = gbcolor;
+			colorBuffer[index + looplength] = gbcolor;
 			index++;
 		}
 	}

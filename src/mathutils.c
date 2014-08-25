@@ -46,9 +46,9 @@ void QUAT_slerp(guQuaternion* q0, guQuaternion* q1, const float t, guQuaternion*
 
 	f32 cosOmega;
 	QUAT_dotProduct(q0, q1, &cosOmega);
-	guQuaternion q0c = *q0, 
+	guQuaternion q0c = *q0,
 				 q1c = *q1;
-	
+
 	if (cosOmega < 0.0f) {
 		f32 invert = -1.f;
 		QUAT_scale(&q1c, &q1c, &invert);
@@ -67,7 +67,7 @@ void QUAT_slerp(guQuaternion* q0, guQuaternion* q1, const float t, guQuaternion*
 		k0 = sin((1.0f - t) * omega) * oneOverSinOmega;
 		k1 = sin(t * omega) * oneOverSinOmega;
 	}
-	
+
 	QUAT_scale(&q0c, &q0c, &k0);
 	QUAT_scale(&q1c, &q1c, &k1);
 	guQuatAdd(&q0c, &q1c, out);
@@ -120,11 +120,10 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 	vecPerpendicular(normal, &T);
 	guVecCross(&T, normal, &B);
 
-	f32 r1 = FncMtRandR32() * 2.0f - 1.0f;
-	f32 r2 = FncMtRandR32() * 2.0f - 1.0f;
+	f32 rand[2] = { FncMtRandR32(), FncMtRandR32() };
+	f32 mad[2] = { 2.0f, -1.0f };
 
-	guVecScale(&T, &T, r1);
-	guVecScale(&B, &B, r2);
+	ps_randScale(&T, &B, rand, mad);
 	guVecAdd(&T, &B, &B);
 	guVecSub(&B, &N, &N);
 	guVecNormalize(&N);

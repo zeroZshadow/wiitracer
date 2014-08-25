@@ -173,7 +173,7 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 		}
 
 		// Alter the current color
-		guVecScale(&hitinfo.material.color, &hitinfo.material.color, 1); //cost
+		//guVecScale(&hitinfo.material.color, &hitinfo.material.color, 1); //cost
 
 		ps_float3Mul(&color, &hitinfo.material.color, &color);
 

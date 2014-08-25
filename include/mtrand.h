@@ -22,17 +22,8 @@ Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, pp 3-30.
 #define	U32_TO_R32_LT_1 ((f32)((1.0-FLT_EPSILON)/0xffffffff))
 #define	U32_TO_R64_LT_1 ((f64)((1.0-DBL_EPSILON)/0xffffffff))
 
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-/* Microsoft or Borland C C/C++ Compiler */
-#define FASTCALL   __fastcall
-#define DECCALL  __cdecl
-
-#else
-/* Etc C/C++ Compilers */
 #define FASTCALL
 #define DECCALL
-
-#endif
 
 #ifdef __cplusplus
 extern "C" {

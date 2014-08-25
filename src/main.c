@@ -24,48 +24,50 @@ int main(int argc, char **argv) {
 	// Create scene
 	scene_t* scene = SCENE_create();
 
-	//White emissive
-	material_t mat1; MAT_init(&mat1, Vector(1, 1, 1), 0.0f, 0);
-	sphere_t sphere1; SPHERE_init(&sphere1, Vector(0, -5, 25), 5.0f, mat1);
+	//Materials
+	material_t diffwhite; MAT_init(&diffwhite, Vector(1, 1, 1), 0.0f, 0);
+	material_t glowwhite; MAT_init(&glowwhite, Vector(1, 1, 1), 1.0f, 0);
+	material_t diffred; MAT_init(&diffred, Vector(1, 0, 0), 0.0f, 0);
+	material_t diffgreen; MAT_init(&diffgreen, Vector(0, 1, 0), 0.0f, 0);
+	material_t diffblue; MAT_init(&diffblue, Vector(0, 0, 1), 0.0f, 0);
 
-	//Green diffuse
-	material_t mat2; MAT_init(&mat2, Vector(0, 1, 0), 0.0f, 0);
-	sphere_t sphere2; SPHERE_init(&sphere2, Vector(10, 0, 35), 5.0f, mat2);
-
-	//Red diffuse
-	material_t mat3; MAT_init(&mat3, Vector(1, 0, 0), 1.0f, 0);
-	sphere_t sphere3; SPHERE_init(&sphere3, Vector(-10, 0, 35), 5.0f, mat3);
+	//Balls
+	sphere_t sphere1; SPHERE_init(&sphere1, Vector(0, -5, 25), 5.0f, diffwhite);
+	sphere_t sphere2; SPHERE_init(&sphere2, Vector(10, 0, 35), 5.0f, diffwhite);
+	sphere_t sphere3; SPHERE_init(&sphere3, Vector(-10, 0, 35), 5.0f, diffwhite);
 
 	//Bottom Floor
-	material_t mat4; MAT_init(&mat4, Vector(1, 1, 1), 0.0f, 0);
-	plane_t plane1; PLANE_init(&plane1, Vector(0, -10, 0), Vector(0, 1, 0), mat4);
+	plane_t floor; PLANE_init(&floor, Vector(0, -10, 0), Vector(0, 1, 0), diffwhite);
+	plane_t ceiling; PLANE_init(&ceiling, Vector(0, 20, 0), Vector(0, -1, 0), glowwhite);
 
-	//Back Panel
-	material_t mat5; MAT_init(&mat5, Vector(0.9, 0.8, 0.9), 0.0f, 0);
-	plane_t plane2; PLANE_init(&plane2, Vector(0, 0, 40), Vector(0, 0, -1), mat5);
+	//Side walls
+	plane_t leftwall; PLANE_init(&leftwall, Vector(-20, 0, 0), Vector(1, 0, 0), diffred);
+	plane_t rightwall; PLANE_init(&rightwall, Vector(20, 0, 0), Vector(-1, 0, 0), diffgreen);
 
-	//FRONT Panel
-	material_t mat6; MAT_init(&mat6, Vector(1, 1, 1), 0.8f, 0);
-	plane_t plane3; PLANE_init(&plane3, Vector(0, 0, -40), Vector(0, 0, 1), mat6);
+	//Back wall
+	plane_t backwall; PLANE_init(&backwall, Vector(0, 0, 40), Vector(0, 0, -1), diffblue);
+
 
 	SCENE_addSphere(scene, sphere1);
 	SCENE_addSphere(scene, sphere2);
 	SCENE_addSphere(scene, sphere3);
-	SCENE_addPlane(scene, plane1);
-	SCENE_addPlane(scene, plane2);
-	SCENE_addPlane(scene, plane3);
+	SCENE_addPlane(scene, floor);
+	SCENE_addPlane(scene, ceiling);
+	SCENE_addPlane(scene, leftwall);
+	SCENE_addPlane(scene, rightwall);
+	SCENE_addPlane(scene, backwall);
 
 	// Create and setup pathtracer information
 	pathtracer_t* tracer = PATH_create(rmode->viWidth, rmode->viHeight, renderWidth, renderHeight);
 
 	// Initialize camera and generate initial rays
 	CAM_init(&tracer->camera, tracer->width, tracer->height);
-	PATH_generateRays(tracer);
 
 	while (1) {
 		if (SYS_ResetButtonDown()) return 0;
 
 		//Pathtrace scene
+		PATH_generateRays(tracer);
 		PATH_draw(tracer, scene);
 
 		//Render buffer to screen

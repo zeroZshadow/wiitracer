@@ -91,6 +91,8 @@ inline u8 vecMinAxis(guVector* vec);
 
 void vecPerpendicular(guVector* vec, guVector* out);
 
+inline f32 fioraRand();
+
 guVector RandomVectorInHemisphere(guVector* normal);
 
 inline guVector Vector(f32 x, f32 y, f32 z);

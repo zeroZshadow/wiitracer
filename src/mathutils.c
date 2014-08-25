@@ -110,6 +110,13 @@ inline guVector Vector(f32 x, f32 y, f32 z) {
 }
 
 
+inline f32 fioraRand() {
+	static u32 val = 0xDEADBEEF;
+	val = 214013 * val + 2531011;
+	u32 temp = (val & 0x007FFFFF) | 0x3F800000;
+	return *(f32*)&temp - 1.0f;
+}
+
 guVector RandomVectorInHemisphere(guVector* normal) {
 	// Jacco Bikker
 	// Altered by Martijn Gerkes
@@ -118,8 +125,8 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 	vecPerpendicular(normal, &T);
 	guVecCross(&T, normal, &B);
 
-	f32 r1 = FncMtRandR32() * 2.0f - 1.0f;
-	f32 r2 = FncMtRandR32() * 2.0f - 1.0f;
+	f32 r1 = fioraRand() * 2.0f - 1.0f;
+	f32 r2 = fioraRand() * 2.0f - 1.0f;
 
 	guVecScale(&T, &T, r1);
 	guVecScale(&B, &B, r2);

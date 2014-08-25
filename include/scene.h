@@ -6,7 +6,7 @@
 #include "sphere.h"
 #include "plane.h"
 
-#define MAXPRIM 5
+#define MAXPRIM 6
 
 typedef struct {
 	sphere_t spheres[MAXPRIM];

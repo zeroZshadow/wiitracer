@@ -1,14 +1,17 @@
 #include "pathtracer.h"
+
 #include <malloc.h>
+#include <math.h>
+#include <string.h>
+#include <stdio.h>
+
 #include "gxutils.h"
 #include "mathutils.h"
 #include "mtrand.h"
-#include <math.h>
-#include <string.h>
 
 pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount) {
 	pathtracer_t* tracer = malloc(sizeof(pathtracer_t));
-	if (tracer == -1) {
+	if (tracer == NULL) {
 		printf("failed to alloc tracer");
 		return 0;
 	}
@@ -22,14 +25,19 @@ pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount) {
 
 	// Allocate rays
 	tracer->raypaths = malloc(sizeof(raypath_t)* tracer->rayCount);
-	if (tracer->raypaths == -1) {
+	if (tracer->raypaths == NULL) {
 		printf("failed to alloc raypaths");
+		free(tracer);
+		return 0;
 	}
 
 	u32 fbuffersize = sizeof(guVector)* hcount * vcount;
 	tracer->fbuffer = malloc(fbuffersize);
-	if (tracer->fbuffer == -1) {
-		kprintf("failed to alloc fbuffer");
+	if (tracer->fbuffer == NULL) {
+		printf("failed to alloc fbuffer");
+		free(tracer->raypaths);
+		free(tracer);
+		return 0;
 	} else {
 		memset(tracer->fbuffer, 0, fbuffersize);
 	}

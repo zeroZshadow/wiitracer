@@ -1,5 +1,6 @@
 /* SDK Libraries */
 #include <gccore.h>
+#include <stdip.h>
 
 #include "mtrand.h"
 #include "gxutils.h"
@@ -8,15 +9,15 @@
 #include "scene.h"
 
 int main(int argc, char **argv) {
-	kprintf("starting");
+	printf("starting");
 	FncMtSrand(time(NULL));
 
 	// Initialize graphics
 	GXU_init();
 
 	// Frame buffer
-	u16 renderWidth = rmode->viWidth >> 1;
-	u16 renderHeight = rmode->viHeight >> 1;
+	u16 renderWidth = rmode->viWidth >> 0;
+	u16 renderHeight = rmode->viHeight >> 0;
 	GXU_createPixelBuffer(renderWidth, renderHeight);
 	GXU_clearPixelBuffer(0xFFFF00FF);
 
@@ -66,6 +67,7 @@ int main(int argc, char **argv) {
 		GXU_done();
 	}
 
+	SCENE_destroy(scene);
 	PATH_destroy(tracer);
 
 	return 0;

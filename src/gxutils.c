@@ -3,6 +3,7 @@
 /* SDK libs */
 #include <string.h>
 #include <malloc.h>
+#include <stdio.h>
 
 
 #define DEFAULT_FIFO_SIZE	(256*1024)
@@ -91,14 +92,15 @@ void GXU_createPixelBuffer(u16 width, u16 height) {
 	screenHeight = height;
 
 	screenTexObject = malloc(sizeof(GXTexObj));
-	if (screenTexObject == -1) {
+	if (screenTexObject == NULL) {
 		printf("failed to alloc screenTexObject");
 		return;
 	}
 
 	u32 buffersize = GX_GetTexBufferSize(width, height, GX_TF_RGBA8, GX_FALSE, 0);
+	printf("allocating screenBuffer [%u]", buffersize);
 	screenBuffer = memalign(32, buffersize);
-	if (screenBuffer == -1) {
+	if (screenBuffer == NULL) {
 		printf("failed to alloc screenBuffer");
 		return;
 	}

@@ -1,9 +1,10 @@
 #include "scene.h"
 #include <malloc.h>
+#include <stdio.h>
 
 scene_t* SCENE_create() {
 	scene_t* scene = malloc(sizeof(scene_t));
-	if (scene == -1) {
+	if (scene == NULL) {
 		printf("failed to alloc scene");
 		return 0;
 	}

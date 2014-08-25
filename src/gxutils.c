@@ -142,18 +142,14 @@ u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley) {
 		for (ix = 0; ix<TILESIZE; ++ix) {
 			u32 color = tileData[ix + (iy * TILESIZE)];
 			u16 arcolor = (color) >> 16; // Alpha | Red
-			colorBuffer[index++] = arcolor;
-		}
-	}
-	for (iy = 0; iy<TILESIZE; ++iy) {
-		for (ix = 0; ix<TILESIZE; ++ix) {
-			u32 color = tileData[ix + (iy * TILESIZE)];
 			u16 gbcolor = color; //Green | Blue
-			colorBuffer[index++] = gbcolor;
+			colorBuffer[index] = arcolor;
+			colorBuffer[index + TILESIZE * TILESIZE] = gbcolor;
+			index++;
 		}
 	}
 
-	return index;
+	return index + TILESIZE * TILESIZE;
 }
 
 void GXU_renderPixelBuffer() {

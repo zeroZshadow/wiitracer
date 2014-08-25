@@ -109,6 +109,7 @@ inline guVector Vector(f32 x, f32 y, f32 z) {
 	return res;
 }
 
+
 guVector RandomVectorInHemisphere(guVector* normal) {
 	// Jacco Bikker
 	// Altered by Martijn Gerkes
@@ -129,33 +130,6 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 
 	return N;
 }
-
-/*
-guVector RandomVectorInHemisphere(guVector* normal) {
-	// Jacco Bikker
-	// Altered by Martijn Gerkes
-	guVector T, B, N;
-	N = *normal;
-	vecPerpendicular(normal, &T);
-	guVecCross(&T, normal, &B);
-
-	f32 r1, r2, len;
-	do {
-		r1 = FncMtRandR32() * 2.0f - 1.0f;
-		r2 = FncMtRandR32() * 2.0f - 1.0f;
-		len = r1 * r1 + r2 * r2;
-	} while (len > 1.0f);
-
-	guVecScale(&T, &T, r1);
-	guVecScale(&B, &B, r2);
-	guVecScale(&N, &N, sqrtf(1 - len));
-	guVecAdd(&T, &B, &B);
-	guVecSub(&B, &N, &N);
-	guVecScale(&N, &N, -1.0f);
-
-	return N;
-}
-*/
 
 void guVecMax(guVector* vector, f32 max) {
 	vector->x = vector->x > max ? max : vector->x;

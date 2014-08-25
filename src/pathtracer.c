@@ -148,7 +148,7 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 	guVector color = { 1, 1, 1 };
 	const guVector black = { 0, 0, 0 };
 	ray_t currentRay;
-	f32 cost = 1.0f;
+	//f32 cost = 1.0f;
 	currentRay.origin = path->base.origin;
 	currentRay.direction = path->base.direction;
 
@@ -185,7 +185,7 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 		}
 
 		//Calculate cost of next color
-		cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
+		//cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
 
 		//TODO: Holy shit this is slow
 		currentRay.direction = RandomVectorInHemisphere(&hitinfo.normal);

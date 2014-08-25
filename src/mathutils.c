@@ -87,7 +87,9 @@ inline f32 vecDistance(guVector* point1, guVector* point2) {
 }
 
 inline u8 vecMinAxis(guVector* vec) {
-	return (fabs(vec->x) <= fabs(vec->y) ? ((fabs(vec->x) <= fabs(vec->z)) ? 0 : 2) : ((fabs(vec->y) <= fabs(vec->z)) ? 1 : 2));
+	guVector abs;
+	ps_vecAbs(vec, &abs);
+	return (abs.x <= abs.y ? (abs.x <= abs.z ? 0 : 2) : (abs.y <= abs.z) ? 1 : 2);
 }
 
 void vecPerpendicular(guVector* vec, guVector* out) {

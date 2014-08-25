@@ -68,3 +68,14 @@ QUAT_scale:
 	ps_muls0	fr5,fr5,fr1
 	psq_st		fr5,8(r4),0,0
 	blr
+
+	.globl ps_vecAbs
+	// r3 = vec, r4 = out
+ps_vecAbs:
+	psq_l		fr1, 0(r3), 0, 0
+	psq_l		fr2, 8(r3), 1, 0
+	ps_abs		fr1, fr1
+	ps_abs		fr2, fr2
+	psq_st		fr1, 0(r4), 0, 0
+	psq_st		fr2, 8(r4), 1, 0
+	blr

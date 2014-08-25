@@ -9,7 +9,7 @@
 #include "mathutils.h"
 #include "mtrand.h"
 
-pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount) {
+pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount) {
 	pathtracer_t* tracer = malloc(sizeof(pathtracer_t));
 	if (tracer == NULL) {
 		printf("failed to alloc tracer");
@@ -44,7 +44,6 @@ pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount) {
 
 	// Reset pass count
 	tracer->pass = 0;
-	tracer->RCP_pass = 0.0f;
 
 	// Return object
 	return tracer;
@@ -147,7 +146,7 @@ void callback(hitinfo_t hitinfo, hitinfo_t *out) {
 
 guVector PATH_trace(raypath_t* path, scene_t* scene) {
 	guVector color = { 1, 1, 1 };
-	guVector black = { 0, 0, 0 };
+	const guVector black = { 0, 0, 0 };
 	ray_t currentRay;
 	f32 cost = 1.0f;
 	currentRay.origin = path->base.origin;
@@ -174,14 +173,14 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 		}
 
 		// Alter the current color
-		guVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
+		guVecScale(&hitinfo.material.color, &hitinfo.material.color, 1); //cost
 
 		color.x *= hitinfo.material.color.x;
 		color.y *= hitinfo.material.color.y;
 		color.z *= hitinfo.material.color.z;
 
 		if (hitinfo.material.emissive > 0.0f) {
-			guVecScale(&color, &color, hitinfo.material.emissive * cost);
+			guVecScale(&color, &color, hitinfo.material.emissive);
 			return color;
 		}
 

@@ -1,6 +1,6 @@
 /* SDK Libraries */
 #include <gccore.h>
-#include <stdip.h>
+#include <stdio.h>
 
 #include "mtrand.h"
 #include "gxutils.h"
@@ -9,15 +9,15 @@
 #include "scene.h"
 
 int main(int argc, char **argv) {
-	printf("starting");
 	FncMtSrand(time(NULL));
 
 	// Initialize graphics
 	GXU_init();
 
 	// Frame buffer
-	u16 renderWidth = rmode->viWidth >> 0;
-	u16 renderHeight = rmode->viHeight >> 0;
+	u16 renderWidth = rmode->viWidth >> 1;
+	u16 renderHeight = rmode->viHeight >> 1;
+	printf("starting %u %u", renderWidth, renderHeight);
 	GXU_createPixelBuffer(renderWidth, renderHeight);
 	GXU_clearPixelBuffer(0xFFFF00FF);
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 	scene_t* scene = SCENE_create();
 
 	//White emissive
-	material_t mat1; MAT_init(&mat1, Vector(1, 1, 1), 8.0f, 0);
+	material_t mat1; MAT_init(&mat1, Vector(1, 1, 1), 0.0f, 0);
 	sphere_t sphere1; SPHERE_init(&sphere1, Vector(0, -5, 25), 5.0f, mat1);
 
 	//Green diffuse
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 	sphere_t sphere2; SPHERE_init(&sphere2, Vector(10, 0, 35), 5.0f, mat2);
 
 	//Red diffuse
-	material_t mat3; MAT_init(&mat3, Vector(1, 0, 0), 0.0f, 0);
+	material_t mat3; MAT_init(&mat3, Vector(1, 0, 0), 1.0f, 0);
 	sphere_t sphere3; SPHERE_init(&sphere3, Vector(-10, 0, 35), 5.0f, mat3);
 
 	//Bottom Floor
@@ -41,13 +41,19 @@ int main(int argc, char **argv) {
 	plane_t plane1; PLANE_init(&plane1, Vector(0, -10, 0), Vector(0, 1, 0), mat4);
 
 	//Back Panel
-	plane_t plane2; PLANE_init(&plane2, Vector(0, 0, 40), Vector(0, 0, -1), mat4);
+	material_t mat5; MAT_init(&mat5, Vector(0.9, 0.8, 0.9), 0.0f, 0);
+	plane_t plane2; PLANE_init(&plane2, Vector(0, 0, 40), Vector(0, 0, -1), mat5);
+
+	//FRONT Panel
+	material_t mat6; MAT_init(&mat6, Vector(1, 1, 1), 0.8f, 0);
+	plane_t plane3; PLANE_init(&plane3, Vector(0, 0, -40), Vector(0, 0, 1), mat6);
 
 	SCENE_addSphere(scene, sphere1);
 	SCENE_addSphere(scene, sphere2);
 	SCENE_addSphere(scene, sphere3);
 	SCENE_addPlane(scene, plane1);
 	SCENE_addPlane(scene, plane2);
+	SCENE_addPlane(scene, plane3);
 
 	// Create and setup pathtracer information
 	pathtracer_t* tracer = PATH_create(rmode->viWidth, rmode->viHeight, renderWidth, renderHeight);

@@ -37,9 +37,6 @@ void GXU_init() {
 	VIDEO_WaitVSync();
 	if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
 
-	/* Enable USBGecko debugging */
-	//CON_EnableGecko(1, FALSE);
-
 	/* Swap frames */
 	fbi ^= 1;
 
@@ -67,7 +64,6 @@ void GXU_init() {
 	GX_SetViewport(0, 0, rmode->fbWidth, rmode->efbHeight, 0, 1);
 
 	Mtx44 perspective;
-	//guOrtho(perspective, 0, rmode->viHeight, 0, rmode->viWidth, 0, 300);
 	guOrtho(perspective, 0, 1, 0, 1, 0, 300);
 	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
 
@@ -106,6 +102,7 @@ void GXU_createPixelBuffer(u16 width, u16 height) {
 	}
 	
 	GX_InitTexObj(screenTexObject, screenBuffer, width, height, GX_TF_RGBA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
+	GX_InitTexObjFilterMode(screenTexObject, GX_LINEAR, GX_LINEAR);
 }
 
 void GXU_clearPixelBuffer(u32 color) {
@@ -137,8 +134,9 @@ u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley) {
 	u16 ix, iy;
 	u16* colorBuffer = screenBuffer;
 
-	const u32 tilewidth = screenWidth / TILESIZE;
-	u32 index = (tilex + (tiley * tilewidth)) * (TILESIZE*TILESIZE) * 2;
+	const u32 widthtiles = screenWidth / TILESIZE;
+	u32 index = (tilex + (tiley * widthtiles)) * (TILESIZE*TILESIZE) << 1;
+	GX_InvalidateTexAll();
 
 	for (iy = 0; iy<TILESIZE; ++iy) {
 		for (ix = 0; ix<TILESIZE; ++ix) {
@@ -150,12 +148,10 @@ u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley) {
 	for (iy = 0; iy<TILESIZE; ++iy) {
 		for (ix = 0; ix<TILESIZE; ++ix) {
 			u32 color = tileData[ix + (iy * TILESIZE)];
-			u16 gbcolor = (color & 0x0000FFFF); //Green | Blue
+			u16 gbcolor = color; //Green | Blue
 			colorBuffer[index++] = gbcolor;
 		}
 	}
-
-	GX_InvalidateTexAll();
 
 	return index;
 }

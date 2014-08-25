@@ -34,6 +34,7 @@ BOOL SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallbac
 		//normal = (hitpos - pos) * rpc_radius
 		guVecSub(&info.position, &sphere->position, &info.normal);
 		guVecScale(&info.normal, &info.normal, sphere->rcp_radius);
+		guVecNormalize(&info.normal);
 
 		callback(info, current);
 

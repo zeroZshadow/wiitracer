@@ -4,6 +4,7 @@
 inline void PLANE_init(plane_t* plane, guVector position, guVector normal, material_t material) {
 	plane->position = position;
 	plane->normal = normal;
+	guVecNormalize(&plane->normal);
 	plane->material = material;
 }
 

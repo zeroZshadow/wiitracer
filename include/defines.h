@@ -1,6 +1,6 @@
 #ifndef _DEFINES_H
 #define _DEFINES_H
 
-#define MAXDEPTH 8
+#define MAXDEPTH 4
 
 #endif

@@ -8,20 +8,18 @@
 #include "gxutils.h"
 
 typedef struct {
-	u16 width, height;
-	u16 hrayCount, vrayCount;
-	u16 rayCount;
-	u16 depth;
+	u32 width, height;
+	u32 hrayCount, vrayCount;
+	u32 rayCount;
 
-	u16 pass;
-	f32 RCP_pass;
+	u32 pass;
 	camera_t camera;
 
 	raypath_t* raypaths;
 	guVector* fbuffer;
 } pathtracer_t;
 
-pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount);
+pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount);
 
 void PATH_destroy(pathtracer_t* tracer);
 

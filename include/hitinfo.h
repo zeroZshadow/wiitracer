@@ -9,6 +9,9 @@ typedef struct {
 	guVector position;
 	guVector normal;
 	f32 distance;
+	BOOL hit;
 } hitinfo_t;
+
+#define hitcallback(x) void(*x)(hitinfo_t, hitinfo_t*)
 
 #endif

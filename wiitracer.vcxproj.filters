@@ -22,6 +22,18 @@
     <Filter Include="Assembly files">
       <UniqueIdentifier>{1cee3868-367a-49de-a15a-5c2a1af9515c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\scene">
+      <UniqueIdentifier>{ef1edf54-719e-4adc-aa5b-0df608f91872}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene\primitive">
+      <UniqueIdentifier>{27c701c5-989f-4754-ae7e-c79f842f36df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene">
+      <UniqueIdentifier>{bd248429-542d-4c3b-8332-ccf478f0cb11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene\primitive">
+      <UniqueIdentifier>{ad87da2d-6586-4863-8f5b-02dbb60ac880}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -29,9 +41,6 @@
     </ClCompile>
     <ClCompile Include="src\psopt.s">
       <Filter>Assembly files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\raycast.c">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gxutils.c">
       <Filter>Source Files</Filter>
@@ -49,13 +58,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\sphere.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\scene\primitive</Filter>
     </ClCompile>
     <ClCompile Include="src\material.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene.c">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plane.c">
+      <Filter>Source Files\scene\primitive</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,9 +76,6 @@
     <None Include="MakefileWii" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\raycast.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\gxutils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -88,17 +97,20 @@
     <ClInclude Include="include\mtrand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\material.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\sphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\hitinfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\sphere.h">
+      <Filter>Header Files\scene\primitive</Filter>
+    </ClInclude>
     <ClInclude Include="include\scene.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\material.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plane.h">
+      <Filter>Header Files\scene\primitive</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

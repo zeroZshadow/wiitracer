@@ -11,8 +11,6 @@ typedef struct {
 
 typedef struct {
 	ray_t base;
-	//ray_t path[MAXDEPTH];
-	//u8 depth;
 } raypath_t;
 
 #endif

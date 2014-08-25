@@ -1,12 +1,11 @@
 #ifndef _PATHTRACER_H
 #define _PATHTRACER_H
 
-#define MAXDEPTH 4
-
 #include <gccore.h>
 #include "scene.h"
 #include "camera.h"
 #include "ray.h"
+#include "gxutils.h"
 
 typedef struct {
 	u16 width, height;
@@ -19,6 +18,7 @@ typedef struct {
 	camera_t camera;
 
 	raypath_t* raypaths;
+	guVector* fbuffer;
 } pathtracer_t;
 
 pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount);
@@ -29,6 +29,6 @@ void PATH_generateRays(pathtracer_t* tracer);
 
 void PATH_draw(pathtracer_t* tracer, scene_t* scene);
 
-GXColor PATH_trace(raypath_t* path, scene_t* scene);
+guVector PATH_trace(raypath_t* path, scene_t* scene);
 
 #endif

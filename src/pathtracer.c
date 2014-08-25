@@ -4,9 +4,14 @@
 #include "mathutils.h"
 #include "mtrand.h"
 #include <math.h>
+#include <string.h>
 
 pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount) {
 	pathtracer_t* tracer = malloc(sizeof(pathtracer_t));
+	if (tracer == -1) {
+		printf("failed to alloc tracer");
+		return 0;
+	}
 
 	// Fill in object data
 	tracer->width = width;
@@ -16,8 +21,18 @@ pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount) {
 	tracer->rayCount = hcount * vcount;
 
 	// Allocate rays
-
 	tracer->raypaths = malloc(sizeof(raypath_t)* tracer->rayCount);
+	if (tracer->raypaths == -1) {
+		printf("failed to alloc raypaths");
+	}
+
+	u32 fbuffersize = sizeof(guVector)* hcount * vcount;
+	tracer->fbuffer = malloc(fbuffersize);
+	if (tracer->fbuffer == -1) {
+		kprintf("failed to alloc fbuffer");
+	} else {
+		memset(tracer->fbuffer, 0, fbuffersize);
+	}
 
 	// Reset pass count
 	tracer->pass = 0;
@@ -29,6 +44,7 @@ pathtracer_t* PATH_create(u16 width, u16 height, u16 hcount, u16 vcount) {
 
 
 void PATH_destroy(pathtracer_t* tracer) {
+	free(tracer->fbuffer);
 	free(tracer->raypaths);
 	free(tracer);
 }
@@ -45,7 +61,6 @@ void PATH_generateRays(pathtracer_t* tracer) {
 	const f32 VBlock = delta.x / (f32)RayHCount;
 
 	// Rays are tiled because of how the texture works
-
 	u32 i = 0;
 	u16 x, y, ix, iy;
 	for (y = 0; y < RayVCount; y += TILESIZE) {
@@ -74,13 +89,12 @@ void PATH_generateRays(pathtracer_t* tracer) {
 }
 
 void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
-	tracer->pass++;
-	tracer->RCP_pass = 1.0f / (f32)tracer->pass;
-
 	// Since we do not have a massive amount of memory, we have to pathtrace is the tiling order so we only have to store 4*4 pixels of data
 	const u16 RayHCount = tracer->hrayCount;
 	const u16 RayVCount = tracer->vrayCount;
-	GXColor tile[TILESIZE*TILESIZE];
+	GXColor datatile[TILESIZE*TILESIZE];
+
+	f32 blendvalue = tracer->pass / (f32)(tracer->pass + 1);
 
 	u16 x, y, ix, iy;
 	u32 i = 0;
@@ -90,48 +104,68 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					raypath_t* path = &tracer->raypaths[i];
-					//path->depth = 0;
 
-					tile[ix + (iy * TILESIZE)] = PATH_trace(path, scene);
+					//Get pixel color for tile
+					guVector color = PATH_trace(path, scene);
 
-					// Set pixel color
+					//Blend with old pixel
+					const u32 index = (x + ix) + ((y + iy) * RayHCount);
+					guVector pixel = tracer->fbuffer[index];
+
+					tracer->fbuffer[index] = pixel = GXU_blendColors(color, pixel, blendvalue);
+
+					//Convert to u32
+					guVecMax(&pixel, 0.9999999999f);
+					guVecMin(&pixel, 0.0f);
+					datatile[ix + (iy * TILESIZE)] = GXU_vectorToColorData(pixel);
 					++i;
 				}
 			}
 
+
 			//Entire tile traced, write to texture
-			GXU_copyTilePixelBuffer((u32*)tile, x / TILESIZE, y / TILESIZE);
+			GXU_copyTilePixelBuffer((u32*)datatile, x / TILESIZE, y / TILESIZE);
 		}
+	}
+
+	tracer->pass++;
+}
+
+void callback(hitinfo_t hitinfo, hitinfo_t *out) {
+	if (hitinfo.distance < out->distance) {
+		*out = hitinfo;
 	}
 }
 
-GXColor PATH_trace(raypath_t* path, scene_t* scene) {
+guVector PATH_trace(raypath_t* path, scene_t* scene) {
 	guVector color = { 1, 1, 1 };
-	GXColor black = { 0xFF, 0x00, 0x00, 0x00 };
+	guVector black = { 0, 0, 0 };
 	ray_t currentRay;
+	f32 cost = 1.0f;
 	currentRay.origin = path->base.origin;
 	currentRay.direction = path->base.direction;
 
 	u8 depth;
 	for (depth = 0; depth < MAXDEPTH; ++depth) {
 		u8 i;
-		BOOL hit = FALSE;
 		hitinfo_t hitinfo;
+		hitinfo.distance = INFINITY;
+		hitinfo.hit = FALSE;
+
+
 		for (i = 0; i < scene->spherecount; ++i) {
-			hitinfo_t temphit;
-			if (SPHERE_raycast(&scene->spheres[i], &currentRay, &temphit)) {
-				// Hit
-				hit = TRUE;
-			}
+			SPHERE_raycast(&scene->spheres[i], &currentRay, &hitinfo, callback);
+		}
+		for (i = 0; i < scene->planecount; ++i) {
+			PLANE_raycast(&scene->planes[i], &currentRay, &hitinfo, callback);
 		}
 
-		if (hit == FALSE) {
+		if (hitinfo.hit == FALSE) {
 			//Nothing was hit, eary out
 			return black;
 		}
 
 		// Alter the current color
-		f32 cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
 		guVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
 
 		color.x *= hitinfo.material.color.x;
@@ -139,12 +173,12 @@ GXColor PATH_trace(raypath_t* path, scene_t* scene) {
 		color.z *= hitinfo.material.color.z;
 
 		if (hitinfo.material.emissive > 0.0f) {
-			guVecScale(&color, &color, hitinfo.material.emissive * 255.f * cost);
-			guVecMax(&color, 0xFF);
-			guVecMin(&color, 0);
-			GXColor result = { 0xFF, color.x, color.y, color.z };
-			return result;
+			guVecScale(&color, &color, hitinfo.material.emissive * cost);
+			return color;
 		}
+
+		//Calculate cost of next color
+		cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
 
 		//TODO: Holy shit this is slow
 		currentRay.direction = RandomVectorInHemisphere(&hitinfo.normal);

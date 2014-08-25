@@ -91,8 +91,17 @@ void GXU_createPixelBuffer(u16 width, u16 height) {
 	screenHeight = height;
 
 	screenTexObject = malloc(sizeof(GXTexObj));
+	if (screenTexObject == -1) {
+		printf("failed to alloc screenTexObject");
+		return;
+	}
+
 	u32 buffersize = GX_GetTexBufferSize(width, height, GX_TF_RGBA8, GX_FALSE, 0);
 	screenBuffer = memalign(32, buffersize);
+	if (screenBuffer == -1) {
+		printf("failed to alloc screenBuffer");
+		return;
+	}
 	
 	GX_InitTexObj(screenTexObject, screenBuffer, width, height, GX_TF_RGBA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
 }
@@ -189,12 +198,29 @@ void GXU_done() {
 		first_frame = 0;
 		VIDEO_SetBlack(FALSE);
 	}
-
+	fbi ^= 1;
 	VIDEO_Flush();
 	VIDEO_WaitVSync();
-	fbi ^= 1;
 }
 
 GXRModeObj* GXU_getMode() {
 	return rmode;
+}
+
+guVector GXU_blendColors(guVector c1, guVector c2, f32 blend) {
+	guVector res, delta;
+	guVecSub(&c2, &c1, &delta);
+	guVecScale(&delta, &delta, blend);
+	guVecAdd(&c1, &delta, &res);
+	return res;
+}
+
+GXColor GXU_vectorToColorData(guVector color) {
+	GXColor res = {
+		0xFF,
+		color.x * 0xFF,
+		color.y * 0xFF,
+		color.z * 0xFF,
+	};
+	return res;
 }

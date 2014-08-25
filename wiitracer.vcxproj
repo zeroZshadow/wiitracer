@@ -67,7 +67,7 @@
     <ClCompile Include="src\mathutils.c" />
     <ClCompile Include="src\mtrand.c" />
     <ClCompile Include="src\pathtracer.c" />
-    <ClCompile Include="src\raycast.c" />
+    <ClCompile Include="src\plane.c" />
     <ClCompile Include="src\scene.c" />
     <ClCompile Include="src\sphere.c" />
   </ItemGroup>
@@ -86,8 +86,8 @@
     <ClInclude Include="include\mathutils.h" />
     <ClInclude Include="include\mtrand.h" />
     <ClInclude Include="include\pathtracer.h" />
+    <ClInclude Include="include\plane.h" />
     <ClInclude Include="include\ray.h" />
-    <ClInclude Include="include\raycast.h" />
     <ClInclude Include="include\scene.h" />
     <ClInclude Include="include\sphere.h" />
   </ItemGroup>

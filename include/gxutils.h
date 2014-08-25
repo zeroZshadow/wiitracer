@@ -41,4 +41,8 @@ void GXU_renderPixelBuffer();
  */
 void GXU_done();
 
+guVector GXU_blendColors(guVector c1, guVector c2, f32 blend);
+
+GXColor GXU_vectorToColorData(guVector color);
+
 #endif

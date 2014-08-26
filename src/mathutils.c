@@ -119,6 +119,7 @@ inline f32 fioraRand() {
 	return *(f32*)&temp - 1.0f;
 }
 
+
 guVector RandomVectorInHemisphere(guVector* normal) {
 	// Jacco Bikker
 	// Altered by Martijn Gerkes
@@ -138,6 +139,34 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 
 	return N;
 }
+
+//Slower :/
+guVector RandomVectorInHemisphere2(guVector* normal) {
+	static const guVector right = { 1, 0, 0 };
+	static const guVector up = { 0, 1, 0 };
+	const f32 u = fioraRand();
+	const f32 v = fioraRand();
+	const f32 r = sqrtf(u);
+	const f32 angle = 6.283185307179586f * v;
+	guVector sdir, tdir, out;
+	if (fabs(normal->x) < .5f) {
+		guVecCross(normal, &right, &sdir);
+	} else {
+		guVecCross(normal, &up, &sdir);
+	}
+	guVecCross(normal, &sdir, &tdir);
+
+	guVecScale(&sdir, &sdir, r*cos(angle));
+	guVecScale(&tdir, &tdir, r*sin(angle));
+	guVecScale(normal, &out, sqrt(1.f - u));
+
+	guVecAdd(&out, &sdir, &out);
+	guVecAdd(&out, &tdir, &out);
+	guVecNormalize(&out);
+	return out;
+	//return r*cos(angle)*sdir + r*sin(angle)*tdir + sqrt(1. - u)*normal;
+}
+
 
 void guVecMax(guVector* vector, f32 max) {
 	vector->x = vector->x > max ? max : vector->x;

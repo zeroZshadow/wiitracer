@@ -109,12 +109,14 @@ void profiler_output(profiler_t* pjob)
 	total_us = __ticks_to_us(pjob->total_time);
 	total_cycles = __ticks_to_cycles(pjob->total_time);
 	
-	printf("Profile Job Name: %s\n\n",name);
-	printf("Number of Hits: %d\n\n",hits);
+	printf("----------------");
+	printf("Profile Job Name: %s\n",name);
+	printf("Number of Hits: %d\n",hits);
+	printf("----------------");
 	printf("Minimum time taken in Microseconds: %lld\n",min_us);
 	printf("Minimum time taken in Cycles: %lld\n\n",min_cycles);
 	printf("Maximum time taken in Microseconds: %lld\n",max_us);
 	printf("Maximum time taken in Cycles: %lld\n\n",max_cycles);
 	printf("Total Time Duration in Microseconds: %lld\n",total_us);
-	printf("Total Time Duration in Cycles: %lld\n",total_cycles);
+	printf("Total Time Duration in Cycles: %lld\n\n",total_cycles);
 }

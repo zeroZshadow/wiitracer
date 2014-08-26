@@ -7,9 +7,12 @@
 #include "pathtracer.h"
 #include "mathutils.h"
 #include "scene.h"
+#include "profiler.h"
 
 BOOL isRunning;
 void OnResetCalled();
+
+profiler_t generate, draw, render;
 
 int main(int argc, char **argv) {
 	SYS_SetResetCallback(OnResetCalled);
@@ -41,18 +44,14 @@ int main(int argc, char **argv) {
 	sphere_t sphere2; SPHERE_init(&sphere2, Vector(10, 0, 35), 5.0f, diffwhite);
 	sphere_t sphere3; SPHERE_init(&sphere3, Vector(-10, 0, 35), 5.0f, diffwhite);
 
-	//Bottom Floor
+	//Walls/Floors
 	plane_t floor; PLANE_init(&floor, Vector(0, -10, 0), Vector(0, 1, 0), diffwhite);
 	plane_t ceiling; PLANE_init(&ceiling, Vector(0, 20, 0), Vector(0, -1, 0), glowwhite);
-
-	//Side walls
 	plane_t leftwall; PLANE_init(&leftwall, Vector(-20, 0, 0), Vector(1, 0, 0), diffred);
 	plane_t rightwall; PLANE_init(&rightwall, Vector(20, 0, 0), Vector(-1, 0, 0), diffgreen);
-
-	//Back wall
 	plane_t backwall; PLANE_init(&backwall, Vector(0, 0, 40), Vector(0, 0, -1), diffblue);
 
-
+	// Add objects to scene
 	SCENE_addSphere(scene, sphere1);
 	SCENE_addSphere(scene, sphere2);
 	SCENE_addSphere(scene, sphere3);
@@ -68,16 +67,39 @@ int main(int argc, char **argv) {
 	// Initialize camera and generate initial rays
 	CAM_init(&tracer->camera, tracer->width, tracer->height);
 
+	// Setup profiler data
+	profiler_create(&generate, "PATH_generateRays");
+	profiler_create(&draw, "PATH_draw");
+	profiler_create(&render, "GXU_renderPixelBuffer");
+
 	isRunning = TRUE;
+	u8 frames = 0;
 	while (isRunning) {
 
-		//Pathtrace scene
-		PATH_generateRays(tracer);
-		PATH_draw(tracer, scene);
+		// Generate rays
+		profiler_start(&generate);
+			PATH_generateRays(tracer);
+		profiler_stop(&generate);
 
-		//Render buffer to screen
-		GXU_renderPixelBuffer();
-		GXU_done();
+		// Draw rays
+		profiler_start(&draw);
+			PATH_draw(tracer, scene);
+		profiler_stop(&draw);
+
+		// Render buffer to screen
+		profiler_start(&render);
+			GXU_renderPixelBuffer();
+			GXU_done();
+		profiler_stop(&render);
+
+		// Print profiling data
+		frames++;
+		if (frames ==  0) {
+			profiler_output(&generate);
+			profiler_output(&draw);
+			profiler_output(&render);
+			frames = 0;
+		}
 	}
 
 	SCENE_destroy(scene);

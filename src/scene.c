@@ -15,6 +15,7 @@ scene_t* SCENE_create() {
 
 void SCENE_init(scene_t* scene) {
 	scene->spherecount = 0;
+	scene->planecount = 0;
 }
 
 void SCENE_destroy(scene_t* scene) {

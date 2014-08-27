@@ -17,17 +17,21 @@ profiler_t generate, draw, render;
 int main(int argc, char **argv) {
 	SYS_SetResetCallback(OnResetCalled);
 
-	FncMtSrand(time(NULL));
+	//FncMtSrand(time(NULL));
 
 	// Initialize graphics
 	GXU_init();
 
 	// Frame buffer
-	u16 renderWidth = rmode->viWidth >> 1;
-	u16 renderHeight = rmode->viHeight >> 1;
+	u16 renderWidth = rmode->viWidth >> 0;
+	u16 renderHeight = rmode->viHeight >> 0;
 	printf("starting %u %u", renderWidth, renderHeight);
 	GXU_createPixelBuffer(renderWidth, renderHeight);
-	GXU_clearPixelBuffer(0xFFFF00FF);
+	GXU_clearPixelBuffer(0xFF000000);
+
+	// Render first frame, so there is no corruption
+	GXU_renderPixelBuffer();
+	GXU_done();
 
 	// Create scene
 	scene_t* scene = SCENE_create();
@@ -94,7 +98,7 @@ int main(int argc, char **argv) {
 
 		// Print profiling data
 		frames++;
-		if (frames ==  0) {
+		if (frames == 20) {
 			profiler_output(&generate);
 			profiler_output(&draw);
 			profiler_output(&render);

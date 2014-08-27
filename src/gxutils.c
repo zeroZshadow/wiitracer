@@ -81,7 +81,7 @@ void GXU_init() {
 
 	GX_InvalidateTexAll();
 
-	first_frame = TRUE;
+	first_frame = GX_TRUE;
 }
 
 void GXU_createPixelBuffer(u16 width, u16 height) {
@@ -118,13 +118,14 @@ void GXU_clearPixelBuffer(u32 color) {
 		for (x = 0; x < screenWidth; x += TILESIZE) {
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
-					u16 arcolor = (color) >> 16; // Alpha | Red
-					u16 gbcolor = (color & 0x0000FFFF); //Green | Blue
+					u16 arcolor = color >> 16;	// Alpha | Red
+					u16 gbcolor = color;		// Green | Blue
 					colorBuffer[index] = arcolor;
 					colorBuffer[index + looplength] = gbcolor;
 					index++;
 				}
 			}
+			index += looplength;
 		}
 	}
 }
@@ -154,6 +155,7 @@ u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley) {
 
 void GXU_renderPixelBuffer() {
 
+	GX_Flush();
 	GX_LoadTexObj(screenTexObject, GX_TEXMAP0);
 
 	GX_InvVtxCache();
@@ -182,14 +184,14 @@ void GXU_done() {
 	/* Finish up rendering */
 	GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 	GX_SetColorUpdate(GX_TRUE);
-	GX_CopyDisp(xfb[fbi], GX_TRUE);
+	GX_CopyDisp(xfb[fbi], first_frame);
 
 	GX_DrawDone();
 
 	/* Flush and swap buffers */
 	VIDEO_SetNextFramebuffer(xfb[fbi]);
-	if (first_frame) {
-		first_frame = 0;
+	if (first_frame == GX_TRUE) {
+		first_frame = GX_FALSE;
 		VIDEO_SetBlack(FALSE);
 	}
 	fbi ^= 1;

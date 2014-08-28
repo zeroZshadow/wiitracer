@@ -15,10 +15,10 @@ typedef struct {
 	u32 hrayCount, vrayCount;
 	u32 rayCount;
 
-	u32 pass;
+	f64 pass;
 	camera_t camera;
 
-	raypath_t* raypaths;
+	ray_t* rays;
 	guVector* fbuffer;
 } pathtracer_t;
 
@@ -30,6 +30,6 @@ void PATH_generateRays(pathtracer_t* tracer);
 
 void PATH_draw(pathtracer_t* tracer, scene_t* scene);
 
-guVector PATH_trace(raypath_t* path, scene_t* scene);
+guVector PATH_trace(ray_t* path, scene_t* scene);
 
 #endif

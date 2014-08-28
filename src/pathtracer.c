@@ -26,8 +26,8 @@ pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount) {
 	tracer->rayCount = hcount * vcount;
 
 	// Allocate rays
-	tracer->raypaths = malloc(sizeof(raypath_t)* tracer->rayCount);
-	if (tracer->raypaths == NULL) {
+	tracer->rays = malloc(sizeof(ray_t)* tracer->rayCount);
+	if (tracer->rays == NULL) {
 		printf("failed to alloc raypaths");
 		free(tracer);
 		return 0;
@@ -37,7 +37,7 @@ pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount) {
 	tracer->fbuffer = malloc(fbuffersize);
 	if (tracer->fbuffer == NULL) {
 		printf("failed to alloc fbuffer");
-		free(tracer->raypaths);
+		free(tracer->rays);
 		free(tracer);
 		return 0;
 	} else {
@@ -45,7 +45,7 @@ pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount) {
 	}
 
 	// Reset pass count
-	tracer->pass = 0;
+	tracer->pass = 0.0;
 
 	// Return object
 	return tracer;
@@ -54,7 +54,7 @@ pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount) {
 
 void PATH_destroy(pathtracer_t* tracer) {
 	free(tracer->fbuffer);
-	free(tracer->raypaths);
+	free(tracer->rays);
 	free(tracer);
 }
 
@@ -79,7 +79,7 @@ void PATH_generateRays(pathtracer_t* tracer) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					// Calculate direction
 					guVector rpos = { (VBlock * (float)(x + ix + fioraRand())), (HBlock * (float)(y + iy + fioraRand())), 0 };
-					guVector* direction = &tracer->raypaths[i].base.direction;
+					guVector* direction = &tracer->rays[i].direction;
 
 					// Calculate direction
 					guVecAdd(&rpos, &camera->point0, direction);
@@ -87,7 +87,7 @@ void PATH_generateRays(pathtracer_t* tracer) {
 					guVecNormalize(direction);
 
 					// Set Ray origin
-					tracer->raypaths[i].base.origin = camera->position;
+					tracer->rays[i].origin = camera->position;
 
 					// Next ray
 					++i;
@@ -103,7 +103,7 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	const u32 RayVCount = tracer->vrayCount;
 	GXColor datatile[TILESIZE*TILESIZE];
 
-	const f32 blendvalue = tracer->pass / (f32)(tracer->pass + 1);
+	const f64 blendvalue = tracer->pass / (tracer->pass + 1.0);
 
 	u16 x, y, ix, iy;
 	u32 i = 0;
@@ -112,11 +112,11 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 			//This is a single tile
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
-					raypath_t* path = &tracer->raypaths[i];
+					ray_t* ray = &tracer->rays[i];
 
 					//Get pixel color for tile
 					profiler_start(&trace);
-					const guVector color = PATH_trace(path, scene);
+					const guVector color = PATH_trace(ray, scene);
 					profiler_stop(&trace);
 
 					//Blend with old pixel
@@ -139,7 +139,7 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 		}
 	}
 
-	tracer->pass++;
+	tracer->pass += 1.0;
 }
 
 void callback(hitinfo_t hitinfo, hitinfo_t *out) {
@@ -148,13 +148,13 @@ void callback(hitinfo_t hitinfo, hitinfo_t *out) {
 	}
 }
 
-guVector PATH_trace(raypath_t* path, scene_t* scene) {
+guVector PATH_trace(ray_t* ray, scene_t* scene) {
 	guVector color = { 1, 1, 1 };
 	const guVector black = { 0, 0, 0 };
 	ray_t currentRay;
 	f32 cost = 1.0f;
-	currentRay.origin = path->base.origin;
-	currentRay.direction = path->base.direction;
+	currentRay.origin = ray->origin;
+	currentRay.direction = ray->direction;
 
 	u8 depth;
 	for (depth = 0; depth < MAXDEPTH; ++depth) {

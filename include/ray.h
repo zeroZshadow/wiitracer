@@ -9,8 +9,4 @@ typedef struct {
 	guVector direction;
 } ray_t;
 
-typedef struct {
-	ray_t base;
-} raypath_t;
-
 #endif

@@ -19,7 +19,6 @@ int main(int argc, char **argv) {
 
 	// Initialize graphics
 	GXU_init();
-	DCEnable();
 
 	// Frame buffer
 	u16 renderWidth = rmode->viWidth >> 0;

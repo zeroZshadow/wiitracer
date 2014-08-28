@@ -9,6 +9,8 @@
 #include "mathutils.h"
 #include "mtrand.h"
 
+profiler_t trace, sphere, plane, output;
+
 pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount) {
 	pathtracer_t* tracer = malloc(sizeof(pathtracer_t));
 	if (tracer == NULL) {
@@ -113,7 +115,9 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 					raypath_t* path = &tracer->raypaths[i];
 
 					//Get pixel color for tile
+					profiler_start(&trace);
 					const guVector color = PATH_trace(path, scene);
+					profiler_stop(&trace);
 
 					//Blend with old pixel
 					const u32 index = (x + ix) + ((y + iy) * RayHCount);
@@ -160,10 +164,14 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 		hitinfo.hit = FALSE;
 
 		for (i = 0; i < scene->spherecount; ++i) {
+			profiler_start(&sphere);
 			SPHERE_raycast(&scene->spheres[i], &currentRay, &hitinfo, callback);
+			profiler_stop(&sphere);
 		}
 		for (i = 0; i < scene->planecount; ++i) {
+			profiler_start(&plane);
 			PLANE_raycast(&scene->planes[i], &currentRay, &hitinfo, callback);
+			profiler_stop(&plane);
 		}
 
 		if (hitinfo.hit == FALSE) {
@@ -181,7 +189,9 @@ guVector PATH_trace(raypath_t* path, scene_t* scene) {
 		}
 
 		//TODO: Holy shit this is slow
+		profiler_start(&output);
 		currentRay.direction = RandomVectorInHemisphere(&hitinfo.normal);
+		profiler_stop(&output);
 		currentRay.origin = hitinfo.position;
 
 		//Calculate cost of next color

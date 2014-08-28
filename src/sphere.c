@@ -1,7 +1,7 @@
 #include "sphere.h"
 #include <math.h>
 
-inline void SPHERE_init(sphere_t* sphere, guVector position, f32 radius, material_t material) {
+void SPHERE_init(sphere_t* sphere, guVector position, f32 radius, material_t material) {
 	sphere->position = position;
 	sphere->material = material;
 
@@ -10,7 +10,7 @@ inline void SPHERE_init(sphere_t* sphere, guVector position, f32 radius, materia
 	sphere->rcp_radius = 1.0f / radius;
 }
 
-BOOL SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallback(callback)) {
+inline void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallback(callback)) {
 	guVector distance;
 	guVecSub(&ray->origin, &sphere->position, &distance);
 
@@ -20,7 +20,7 @@ BOOL SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallbac
 
 	if (D > 0.0f) {
 		const f32 dist = -B - sqrtf(D);
-		if (dist < 0.0f) return FALSE;
+		if (dist < 0.0f) return;
 
 		hitinfo_t info;
 		info.material = sphere->material;
@@ -37,9 +37,5 @@ BOOL SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallbac
 		guVecNormalize(&info.normal);
 
 		callback(info, current);
-
-		return TRUE;
 	}
-
-	return FALSE;
 }

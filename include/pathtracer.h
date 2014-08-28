@@ -6,6 +6,9 @@
 #include "camera.h"
 #include "ray.h"
 #include "gxutils.h"
+#include "profiler.h"
+
+extern profiler_t trace, sphere, plane, output;
 
 typedef struct {
 	u32 width, height;

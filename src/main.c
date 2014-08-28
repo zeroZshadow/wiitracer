@@ -12,12 +12,10 @@
 BOOL isRunning;
 void OnResetCalled();
 
-profiler_t generate, draw, render;
-
 int main(int argc, char **argv) {
 	SYS_SetResetCallback(OnResetCalled);
 
-	//FncMtSrand(time(NULL));
+	FncMtSrand(time(NULL));
 
 	// Initialize graphics
 	GXU_init();
@@ -72,36 +70,32 @@ int main(int argc, char **argv) {
 	CAM_init(&tracer->camera, tracer->width, tracer->height);
 
 	// Setup profiler data
-	profiler_create(&generate, "PATH_generateRays");
-	profiler_create(&draw, "PATH_draw");
-	profiler_create(&render, "GXU_renderPixelBuffer");
+	profiler_create(&trace, "PATH_trace");
+	profiler_create(&sphere, "SPHERE_trace");
+	profiler_create(&plane, "PLANE_trace");
+	profiler_create(&output, "Output");
 
 	isRunning = TRUE;
 	u8 frames = 0;
 	while (isRunning) {
 
 		// Generate rays
-		profiler_start(&generate);
-			PATH_generateRays(tracer);
-		profiler_stop(&generate);
+		PATH_generateRays(tracer);
 
 		// Draw rays
-		profiler_start(&draw);
-			PATH_draw(tracer, scene);
-		profiler_stop(&draw);
+		PATH_draw(tracer, scene);
 
 		// Render buffer to screen
-		profiler_start(&render);
-			GXU_renderPixelBuffer();
-			GXU_done();
-		profiler_stop(&render);
+		GXU_renderPixelBuffer();
+		GXU_done();
 
 		// Print profiling data
 		frames++;
 		if (frames == 20) {
-			profiler_output(&generate);
-			profiler_output(&draw);
-			profiler_output(&render);
+			profiler_output(&trace);
+			profiler_output(&sphere);
+			profiler_output(&plane);
+			profiler_output(&output);
 			frames = 0;
 		}
 	}

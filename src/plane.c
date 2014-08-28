@@ -1,20 +1,22 @@
 #include "plane.h"
 #include <math.h>
 
-inline void PLANE_init(plane_t* plane, guVector position, guVector normal, material_t material) {
+void PLANE_init(plane_t* plane, guVector position, guVector normal, material_t material) {
 	plane->position = position;
 	plane->normal = normal;
 	guVecNormalize(&plane->normal);
 	plane->material = material;
 }
 
-BOOL PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcallback(callback)) {
-
+inline void PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcallback(callback)) {
 	guVector delta;
 	guVecSub(&plane->position, &ray->origin, &delta);
 
-	const f32 dist = guVecDotProduct(&plane->normal, &delta) / guVecDotProduct(&plane->normal, &ray->direction);
-	if (dist > 0) {
+	const f32 B = guVecDotProduct(&plane->normal, &ray->direction);
+	const f32 C = guVecDotProduct(&plane->normal, &delta);
+	const f32 dist = C / B;
+
+	if (dist > 0.0f) {
 		hitinfo_t info;
 		info.material = plane->material;
 		info.distance = dist;
@@ -28,9 +30,5 @@ BOOL PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcallback(c
 		info.normal = plane->normal;
 
 		callback(info, current);
-
-		return TRUE;
 	}
-
-	return FALSE;
 }

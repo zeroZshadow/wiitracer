@@ -141,6 +141,7 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 }
 
 //Slower :/
+/*
 guVector RandomVectorInHemisphere2(guVector* normal) {
 	static const guVector right = { 1, 0, 0 };
 	static const guVector up = { 0, 1, 0 };
@@ -165,6 +166,7 @@ guVector RandomVectorInHemisphere2(guVector* normal) {
 	guVecNormalize(&out);
 	return out;
 }
+*/
 
 
 void guVecMax(guVector* vector, f32 max) {

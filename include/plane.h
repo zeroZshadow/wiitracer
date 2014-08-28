@@ -12,7 +12,7 @@ typedef struct {
 	guVector normal;
 } plane_t;
 
-inline void PLANE_init(plane_t* plane, guVector position, guVector normal, material_t material);
+void PLANE_init(plane_t* plane, guVector position, guVector normal, material_t material);
 
-BOOL PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcallback(callback));
+inline void PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcallback(callback));
 #endif

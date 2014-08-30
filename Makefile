@@ -23,6 +23,7 @@ BUILD		:=	obj
 SOURCES		:=	src
 DATA		:=	data 
 MODELS		:=	models 
+DSP			:=	dsp
 INCLUDES	:=  include
 TEXTURES	:=	textures
 
@@ -58,6 +59,7 @@ export OUTPUT	:=	$(CURDIR)/$(TARGET)
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(MODELS),$(CURDIR)/$(dir)) \
+					$(foreach dir,$(DSP),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(TEXTURES),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
@@ -71,6 +73,7 @@ sFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.S)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 OBJFILES	:=	$(foreach dir,$(MODELS),$(notdir $(wildcard $(dir)/*.obj)))
+DSPFILES	:=	$(foreach dir,$(DSP),$(notdir $(wildcard $(dir)/*.dsp)))
 SCFFILES	:=	$(foreach dir,$(TEXTURES),$(notdir $(wildcard $(dir)/*.scf)))
 BMBFILES	:=	$(OBJFILES:.obj=.bmb)
 TPLFILES	:=	$(SCFFILES:.scf=.tpl)
@@ -87,6 +90,7 @@ endif
 export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
 					$(addsuffix .o,$(BMBFILES)) \
 					$(addsuffix .o,$(TPLFILES)) \
+					$(addsuffix .o,$(DSPFILES)) \
 					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 					$(sFILES:.s=.o) $(SFILES:.S=.o)
 
@@ -158,6 +162,7 @@ $(OUTPUT).elf: $(OFILES)
 # This rule links in binary data with the .bmb extension
 #---------------------------------------------------------------------------------
 %.bmb.o	:	%.bmb
+#---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	$(bin2o)
 
@@ -166,6 +171,16 @@ $(OUTPUT).elf: $(OFILES)
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
+
+#---------------------------------------------------------------------------------
+%.dsp.o	:	%.dsp
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@DSPTool -o $(notdir $<).tmp $<
+	@bin2s -a 32 $(notdir $<).tmp | $(AS) -o $(@)
+	@echo "extern const u8" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"_end[];" > `(echo $(<F) | tr . _)`.h
+	@echo "extern const u8" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"[];" >> `(echo $(<F) | tr . _)`.h
+	@echo "extern const u32" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`_size";" >> `(echo $(<F) | tr . _)`.h
 	
 -include $(DEPENDS)
 

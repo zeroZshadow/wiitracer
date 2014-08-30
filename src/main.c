@@ -9,6 +9,8 @@
 #include "scene.h"
 #include "profiler.h"
 
+#include "test_dsp.h"
+
 BOOL isRunning;
 void OnResetCalled();
 

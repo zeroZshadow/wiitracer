@@ -106,24 +106,29 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	const f64 blendvalue = tracer->pass / (tracer->pass + 1.0);
 
 	u16 x, y, ix, iy;
-	u32 i = 0;
+	u32 i = 0, r;
 	for (y = 0; y < RayVCount; y += TILESIZE) {
 		for (x = 0; x < RayHCount; x += TILESIZE) {
 			//This is a single tile
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
-					ray_t* ray = &tracer->rays[i];
-
-					//Get pixel color for tile
-					profiler_start(&trace);
-					const guVector color = PATH_trace(ray, scene);
-					profiler_stop(&trace);
-
-					//Blend with old pixel
 					const u32 index = (x + ix) + ((y + iy) * RayHCount);
+					ray_t* ray = &tracer->rays[i];
 					guVector pixel = tracer->fbuffer[index];
 
-					tracer->fbuffer[index] = pixel = GXU_blendColors(color, pixel, blendvalue);
+					// Raytrace same pixel R times
+					//for (r = 0; r < 1; ++r) {
+						//Get pixel color for tile
+						profiler_start(&trace);
+						const guVector color = PATH_trace(ray, scene);
+						profiler_stop(&trace);
+
+						//Blend with old pixel
+						pixel = GXU_blendColors(color, pixel, blendvalue);
+					//}
+
+					//Store pixel back
+					tracer->fbuffer[index] = pixel;
 
 					//Convert to u32
 					guVecMax(&pixel, 1.0f);

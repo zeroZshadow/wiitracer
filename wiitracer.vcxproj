@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="dsp\test.dsp" />
     <None Include="Makefile" />
     <ClCompile Include="src\psopt.s" />
     <None Include="MakefileWii" />

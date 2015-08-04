@@ -7,14 +7,11 @@
 #include "pathtracer.h"
 #include "mathutils.h"
 #include "scene.h"
-#include "profiler.h"
-
-#include "test_dsp.h"
 
 BOOL isRunning;
 void OnResetCalled();
 
-int main(int argc, char **argv) {
+int main() { //int argc, char **argv) {
 	SYS_SetResetCallback(OnResetCalled);
 
 	FncMtSrand(time(NULL));
@@ -71,14 +68,7 @@ int main(int argc, char **argv) {
 	// Initialize camera and generate initial rays
 	CAM_init(&tracer->camera, tracer->width, tracer->height);
 
-	// Setup profiler data
-	profiler_create(&trace, "PATH_trace");
-	profiler_create(&sphere, "SPHERE_trace");
-	profiler_create(&plane, "PLANE_trace");
-	profiler_create(&output, "Output");
-
 	isRunning = TRUE;
-	u8 frames = 0;
 	while (isRunning) {
 
 		// Generate rays
@@ -90,16 +80,6 @@ int main(int argc, char **argv) {
 		// Render buffer to screen
 		GXU_renderPixelBuffer();
 		GXU_done();
-
-		// Print profiling data
-		frames++;
-		if (frames == 20) {
-			profiler_output(&trace);
-			profiler_output(&sphere);
-			profiler_output(&plane);
-			profiler_output(&output);
-			frames = 0;
-		}
 	}
 
 	SCENE_destroy(scene);

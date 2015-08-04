@@ -84,6 +84,9 @@
     <ClCompile Include="src\timer.c">
       <Filter>Source Files\profiler</Filter>
     </ClCompile>
+    <ClCompile Include="src\mu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
@@ -138,6 +141,9 @@
     </ClInclude>
     <ClInclude Include="include\types.h">
       <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mu.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

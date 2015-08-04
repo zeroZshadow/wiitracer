@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "mathutils.h"
+#include "mu.h"
 
 #define DEFAULT_FIFO_SIZE	(256*1024)
 void *xfb[2] = { NULL, NULL };
@@ -205,9 +206,9 @@ GXRModeObj* GXU_getMode() {
 
 guVector GXU_blendColors(guVector c1, guVector c2, f32 blend) {
 	guVector res, delta;
-	guVecSub(&c2, &c1, &delta);
-	guVecScale(&delta, &delta, blend);
-	guVecAdd(&c1, &delta, &res);
+	muVecSub(&c2, &c1, &delta);
+	muVecScale(&delta, &delta, blend);
+	muVecAdd(&c1, &delta, &res);
 	return res;
 }
 

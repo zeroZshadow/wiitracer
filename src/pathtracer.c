@@ -7,9 +7,8 @@
 
 #include "gxutils.h"
 #include "mathutils.h"
+#include "mu.h"
 #include "mtrand.h"
-
-profiler_t trace, sphere, plane, output;
 
 pathtracer_t* PATH_create(u32 width, u32 height, u32 hcount, u32 vcount) {
 	pathtracer_t* tracer = malloc(sizeof(pathtracer_t));
@@ -61,7 +60,7 @@ void PATH_destroy(pathtracer_t* tracer) {
 void PATH_generateRays(pathtracer_t* tracer) {
 	camera_t* camera = &tracer->camera;
 	guVector delta;
-	guVecSub(&camera->point1, &camera->point0, &delta);
+	muVecSub(&camera->point1, &camera->point0, &delta);
 	const u16 RayHCount = tracer->hrayCount;
 	const u16 RayVCount = tracer->vrayCount;
 
@@ -82,9 +81,9 @@ void PATH_generateRays(pathtracer_t* tracer) {
 					guVector* direction = &tracer->rays[i].direction;
 
 					// Calculate direction
-					guVecAdd(&rpos, &camera->point0, direction);
-					guVecSub(direction, &camera->position, direction);
-					guVecNormalize(direction);
+					muVecAdd(&rpos, &camera->point0, direction);
+					muVecSub(direction, &camera->position, direction);
+					muVecNormalize(direction);
 
 					// Set Ray origin
 					tracer->rays[i].origin = camera->position;
@@ -106,7 +105,7 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	const f64 blendvalue = tracer->pass / (tracer->pass + 1.0);
 
 	u16 x, y, ix, iy;
-	u32 i = 0, r;
+	u32 i = 0;// , r;
 	for (y = 0; y < RayVCount; y += TILESIZE) {
 		for (x = 0; x < RayHCount; x += TILESIZE) {
 			//This is a single tile
@@ -119,9 +118,7 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 					// Raytrace same pixel R times
 					//for (r = 0; r < 1; ++r) {
 						//Get pixel color for tile
-						profiler_start(&trace);
 						const guVector color = PATH_trace(ray, scene);
-						profiler_stop(&trace);
 
 						//Blend with old pixel
 						pixel = GXU_blendColors(color, pixel, blendvalue);
@@ -169,14 +166,10 @@ guVector PATH_trace(ray_t* ray, scene_t* scene) {
 		hitinfo.hit = FALSE;
 
 		for (i = 0; i < scene->spherecount; ++i) {
-			profiler_start(&sphere);
 			SPHERE_raycast(&scene->spheres[i], &currentRay, &hitinfo, callback);
-			profiler_stop(&sphere);
 		}
 		for (i = 0; i < scene->planecount; ++i) {
-			profiler_start(&plane);
 			PLANE_raycast(&scene->planes[i], &currentRay, &hitinfo, callback);
-			profiler_stop(&plane);
 		}
 
 		if (hitinfo.hit == FALSE) {
@@ -185,22 +178,20 @@ guVector PATH_trace(ray_t* ray, scene_t* scene) {
 		}
 
 		// Alter the current color
-		guVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
+		muVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
 		ps_float3Mul(&color, &hitinfo.material.color, &color);
 
 		if (hitinfo.material.emissive > 0.0f) {
-			guVecScale(&color, &color, hitinfo.material.emissive);
+			muVecScale(&color, &color, hitinfo.material.emissive);
 			return color;
 		}
 
 		//TODO: Holy shit this is slow
-		profiler_start(&output);
 		currentRay.direction = RandomVectorInHemisphere(&hitinfo.normal);
-		profiler_stop(&output);
 		currentRay.origin = hitinfo.position;
 
 		//Calculate cost of next color
-		cost = fabs(guVecDotProduct(&hitinfo.normal, &currentRay.direction));
+		cost = fabs(muVecDotProduct(&hitinfo.normal, &currentRay.direction));
 	}
 
 	return black;

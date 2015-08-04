@@ -66,6 +66,7 @@
     <ClCompile Include="src\material.c" />
     <ClCompile Include="src\mathutils.c" />
     <ClCompile Include="src\mtrand.c" />
+    <ClCompile Include="src\mu.c" />
     <ClCompile Include="src\pathtracer.c" />
     <ClCompile Include="src\plane.c" />
     <ClCompile Include="src\profiler.c" />
@@ -88,6 +89,7 @@
     <ClInclude Include="include\material.h" />
     <ClInclude Include="include\mathutils.h" />
     <ClInclude Include="include\mtrand.h" />
+    <ClInclude Include="include\mu.h" />
     <ClInclude Include="include\pathtracer.h" />
     <ClInclude Include="include\plane.h" />
     <ClInclude Include="include\profiler.h" />

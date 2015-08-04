@@ -1,4 +1,5 @@
 #include "mathutils.h"
+#include "mu.h"
 #include <math.h>
 #include <ogc/gu.h>
 #include "mtrand.h"
@@ -6,7 +7,7 @@
 void EulerToQuaternion(guQuaternion* q, const f32 rX, const f32 rY, const f32 rZ) {
 	guVector vec;
 	vec.x = rX; vec.y = rY; vec.z = rZ;
-	guVecScale(&vec, &vec, 0.5f);
+	muVecScale(&vec, &vec, 0.5f);
 
 	f32 x[2], y[2], z[2];
 
@@ -21,7 +22,7 @@ void AxisAngleToQuaternion(guQuaternion* q, guVector rAxis, const f32 rAngle) {
 	f32 s, c;
 	sincosf(rAngle / 2.0f, &s, &c);
 	guVector out;
-	guVecScale(&rAxis, &out, s);
+	muVecScale(&rAxis, &out, s);
 	q->x = out.x;
 	q->y = out.y;
 	q->z = out.z;
@@ -77,12 +78,12 @@ void QUAT_slerp(guQuaternion* q0, guQuaternion* q1, const float t, guQuaternion*
 /* This should be in gu.h or something */
 
 inline f32 guVecMag(guVector* vec) {
-	return sqrt(guVecDotProduct(vec, vec));
+	return sqrt(muVecDotProduct(vec, vec));
 }
 
 inline f32 vecDistance(guVector* point1, guVector* point2) {
 	guVector sub;
-	guVecSub(point2, point1, &sub);
+	muVecSub(point2, point1, &sub);
 	return guVecMag(&sub);
 }
 
@@ -126,48 +127,19 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 	guVector T, B, N;
 	N = *normal;
 	vecPerpendicular(normal, &T);
-	guVecCross(&T, normal, &B);
+	muVecCross(&T, normal, &B);
 
 	f32 rand[2] = { fioraRand(), fioraRand() };
 	f32 mad[2] = { 2.0f, -1.0f };
 
 	ps_randScale(&T, &B, rand, mad);
-	guVecAdd(&T, &B, &B);
-	guVecSub(&B, &N, &N);
-	guVecNormalize(&N);
-	guVecScale(&N, &N, -1.0f);
+	muVecAdd(&T, &B, &B);
+	muVecSub(&B, &N, &N);
+	muVecNormalize(&N);
+	muVecScale(&N, &N, -1.0f);
 
 	return N;
 }
-
-//Slower :/
-/*
-guVector RandomVectorInHemisphere2(guVector* normal) {
-	static const guVector right = { 1, 0, 0 };
-	static const guVector up = { 0, 1, 0 };
-	const f32 u = fioraRand();
-	const f32 v = fioraRand();
-	const f32 r = sqrtf(u);
-	const f32 angle = 6.283185307179586f * v;
-	guVector sdir, tdir, out;
-	if (fabs(normal->x) < .5f) {
-		guVecCross(normal, &right, &sdir);
-	} else {
-		guVecCross(normal, &up, &sdir);
-	}
-	guVecCross(normal, &sdir, &tdir);
-
-	guVecScale(&sdir, &sdir, r*cos(angle));
-	guVecScale(&tdir, &tdir, r*sin(angle));
-	guVecScale(normal, &out, sqrt(1.f - u));
-
-	guVecAdd(&out, &sdir, &out);
-	guVecAdd(&out, &tdir, &out);
-	guVecNormalize(&out);
-	return out;
-}
-*/
-
 
 void guVecMax(guVector* vector, f32 max) {
 	vector->x = vector->x > max ? max : vector->x;

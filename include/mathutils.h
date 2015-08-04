@@ -37,7 +37,7 @@ inline void ps_float2Mul(f32* opA, f32* opB, f32* result);
  *  \param[in] vec2 Second vector
  *  \param[out] result Result vector 
  */
-inline void ps_float3Mul(guVector* vec1, guVector* vec2, guVector* out);
+extern void ps_float3Mul(guVector* vec1, guVector* vec2, guVector* out);
 
 /*! \brief ASM part of EulerToQuaternion, don't use alone!
  *  \param[in] x Sin/Cos of Euler X
@@ -45,7 +45,7 @@ inline void ps_float3Mul(guVector* vec1, guVector* vec2, guVector* out);
  *  \param[in] z Sin/Cos of Euler Z
  *  \param[out] out Resultant quaternion
  */
-inline void ps_eulerQuat(f32* x, f32* y, f32* z, guQuaternion* out);
+extern void ps_eulerQuat(f32* x, f32* y, f32* z, guQuaternion* out);
 
 /*! \brief Quaternion lookAt
  *  \param[in]  forward Forward vector (Direction)
@@ -95,15 +95,15 @@ f32 guVecSquareMag(guVector* vec);
  */
 f32 vecDistance(guVector* point1, guVector* point2);
 
-inline u8 vecMinAxis(guVector* vec);
+u8 vecMinAxis(guVector* vec);
 
 void vecPerpendicular(guVector* vec, guVector* out);
 
-inline f32 fioraRand();
+f32 fioraRand();
 
 guVector RandomVectorInHemisphere(guVector* normal);
 
-inline guVector Vector(f32 x, f32 y, f32 z);
+guVector Vector(f32 x, f32 y, f32 z);
 
 void guVecMax(guVector* vector, f32 max);
 

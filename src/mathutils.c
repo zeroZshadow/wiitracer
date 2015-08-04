@@ -77,7 +77,7 @@ void QUAT_slerp(guQuaternion* q0, guQuaternion* q1, const float t, guQuaternion*
 
 /* This should be in gu.h or something */
 
-inline f32 guVecMag(guVector* vec) {
+f32 guVecMag(guVector* vec) {
 	return sqrt(muVecDotProduct(vec, vec));
 }
 
@@ -107,13 +107,13 @@ void vecPerpendicular(guVector* vec, guVector* out) {
 	}
 }
 
-inline guVector Vector(f32 x, f32 y, f32 z) {
+guVector Vector(f32 x, f32 y, f32 z) {
 	guVector res = { x, y, z };
 	return res;
 }
 
 
-inline f32 fioraRand() {
+f32 fioraRand() {
 	static u32 seed = 0xDEADBEEF;
 	seed = 214013 * seed + 2531011;
 	const u32 temp = (seed & 0x007FFFFF) | 0x3F800000;

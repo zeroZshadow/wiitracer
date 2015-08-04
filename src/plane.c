@@ -13,8 +13,9 @@ inline void PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcal
 	guVector delta;
 	muVecSub(&plane->position, &ray->origin, &delta);
 
-	const f32 B = muVecDotProduct(&plane->normal, &ray->direction);
-	const f32 C = muVecDotProduct(&plane->normal, &delta);
+	f32 B, C;
+	B = muVecDotProduct(&plane->normal, &ray->direction);
+	C = muVecDotProduct(&plane->normal, &delta);
 	const f32 dist = C / B;
 
 	if (dist > 0.0f) {

@@ -1,23 +1,10 @@
-#include "mu.h"
+//#include "mu.h"
 
-#define RET_REG		fr1
-#define V1_XY		fr2
-#define V1_Z		fr3
-#define V2_XY		fr4
-#define V2_Z		fr5
-#define D1_XY		fr6
-#define D1_Z		fr7
-#define D2_XY		fr8
-#define D2_Z		fr9
-#define W1_XY		fr10
-#define W1_Z		fr11
-#define W2_XY		fr12
-#define W2_Z		fr13
+#include <ogc/gu.h>
 
 float NrmData[] = { 0.5, 3.0 };
-float n1 = 0.5;
-float n2 = 3.0;
 
+/*
 inline void muVecAdd(register guVector *a, register guVector *b, register guVector *ab) {
 	asm(
 		"psq_l		2, 0(%[a]), 0, 0;"
@@ -30,9 +17,10 @@ inline void muVecAdd(register guVector *a, register guVector *b, register guVect
 		"psq_st		7, 8(%[ab]), 1, 0;"
 		:
 		: [a] "r"(a), [b] "r"(b), [ab] "r"(ab)
-		: "2", "3", "4", "5", "6", "7"
+		: "memory", "2", "3", "4", "5", "6", "7"
 	);
 }
+
 
 inline void muVecSub(register guVector *a, register guVector *b, register guVector *ab) {
 	asm(
@@ -46,11 +34,12 @@ inline void muVecSub(register guVector *a, register guVector *b, register guVect
 		"psq_st		7, 8(%[ab]), 1, 0;"
 		:
 		: [a] "r"(a), [b] "r"(b), [ab] "r"(ab)
-		: "2", "3", "4", "5", "6", "7"
+		: "memory", "2", "3", "4", "5", "6", "7"
 	);
 }
+*/
 
-inline void muVecScale(register guVector *src, register guVector *dst, f32 scale) {
+void muVecScale(register guVector *src, register guVector *dst, f32 scale) {
 	asm(
 		"psq_l		2, 0(%[src]), 0, 0;"
 		"psq_l		3, 8(%[src]), 1, 0;"
@@ -60,12 +49,12 @@ inline void muVecScale(register guVector *src, register guVector *dst, f32 scale
 		"psq_st		4, 8(%[dst]), 1, 0;"
 		:
 		: [src] "r"(src), [dst] "r"(dst), "f"(scale)
-		: "2", "3", "4"
+		: "memory", "2", "3", "4"
 	);
 }
 
 //TODO: Wasting a register on NrmData adress, find out how to use directly from memory!
-inline void muVecNormalize(register guVector *v) {
+void muVecNormalize(register guVector *v) {
 	asm(
 		"lfs		0, 0(%[data]);"
 		"lfs		1, 4(%[data]);"
@@ -85,11 +74,11 @@ inline void muVecNormalize(register guVector *v) {
 		"psq_st		3, 8(%[v]), 1, 0;"
 		:
 		: [v] "r"(v), [data] "r"(&NrmData)
-		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
 	);
 }
 
-inline void muVecCross(register guVector *a, register guVector *b, register guVector *axb) {
+void muVecCross(register guVector *a, register guVector *b, register guVector *axb) {
 	asm(
 		"psq_l		1, 0(%[b]), 0, 0;"
 		"lfs		2, 8(%[a]);"
@@ -107,11 +96,11 @@ inline void muVecCross(register guVector *a, register guVector *b, register guVe
 		"psq_st		10, 4(%[axb]), 0, 0;"
 		:
 		: [a] "r"(a), [b] "r"(b), [axb] "r"(axb)
-		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
 	);
 }
 
-inline void muVecMultiply(register Mtx mt, register guVector *src, register guVector *dst) {
+void muVecMultiply(register Mtx mt, register guVector *src, register guVector *dst) {
 	asm(
 		"psq_l		0, 0(%[src]), 0, 0;"
 		"psq_l		2, 0(%[mt]), 0, 0;"
@@ -135,11 +124,11 @@ inline void muVecMultiply(register Mtx mt, register guVector *src, register guVe
 		"psq_st		6, 8(%[dst]), 1, 0;"
 		:
 		: [mt] "r"(mt), [src] "r"(src), [dst] "r"(dst)
-		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
+		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
 	);
 }
 
-inline void muVecMultiplySR(register Mtx mt, register guVector *src, register guVector *dst) {
+void muVecMultiplySR(register Mtx mt, register guVector *src, register guVector *dst) {
 	asm(
 		"psq_l		0, 0(%[mt]), 0, 0;"
 		"psq_l		6, 0(%[src]), 0, 0;"
@@ -163,11 +152,37 @@ inline void muVecMultiplySR(register Mtx mt, register guVector *src, register gu
 		"psq_st		13, 8(%[dst]), 1, 0;"
 		:
 		: [mt] "r"(mt), [src] "r"(src), [dst] "r"(dst)
-		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"
+		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"
 	);
 }
 
-inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
+
+f32 muVecDotProduct(register guVector *a, register guVector *b) {
+	register f32 result;
+	register f32 inter0;
+	register f32 inter1;
+	register f32 inter2;
+	register f32 inter3;
+	__asm__ (
+		"psq_l            %[int1], 4(%[a]), 0, 0;"
+		"psq_l            %[int2], 4(%[b]), 0, 0;"
+		"ps_mul           %[int1], %[int1], %[int2];"
+		"psq_l            %[int3], 0(%[a]), 0, 0;"
+		"psq_l            %[int4], 0(%[b]), 0, 0;"
+		"ps_madd    %[int2], %[int3], %[int4], %[int1];"
+		"ps_sum0    %[res], %[int2], %[int1], %[int1];"
+		: [res] "=f"(result),
+		[int1] "=f" (inter0),
+		[int2] "=f" (inter1),
+		[int3] "=f" (inter2),
+		[int4] "=f" (inter3)
+		: [a]"r"(a), [b]"r"(b)
+	);
+	return result;
+}
+/*
+
+f32 muVecDotProduct(register guVector *a, register guVector *b) {
 	f32 result;
 	__asm__(
 		"psq_l		2, 4(%[a]), 0, 0;"
@@ -180,6 +195,7 @@ inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
 		: "=f"(result)
 		: [a]"r"(a), [b]"r"(b)
 		: "2", "3", "4", "5"
-	);
+		);
 	return result;
 }
+*/

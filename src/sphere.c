@@ -11,12 +11,14 @@ void SPHERE_init(sphere_t* sphere, guVector position, f32 radius, material_t mat
 	sphere->rcp_radius = 1.0f / radius;
 }
 
-inline void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallback(callback)) {
+void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallback(callback)) {
 	guVector distance;
 	muVecSub(&ray->origin, &sphere->position, &distance);
 
-	const f32 B = muVecDotProduct(&distance, &ray->direction);
-	const f32 C = muVecDotProduct(&distance, &distance) - sphere->sqr_radius;
+	f32 B, C;
+	B = muVecDotProduct(&distance, &ray->direction);
+	C = muVecDotProduct(&distance, &distance);
+	C -= sphere->sqr_radius;
 	const f32 D = B * B - C;
 
 	if (D > 0.0f) {

@@ -181,4 +181,17 @@ static inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
 	return result;
 }
 
+//XXX: BROKEN
+static inline f32 muSqrtf(register float val) {
+	register float res;
+	register float tmp;
+	asm("frsqrte %[tmp], %[in];"
+		"fres %[out], %[tmp];"
+		: [out] "=f" (res),
+		  [tmp] "=f" (tmp)
+		: [in] "f" (val)
+	);
+	return res;
+}
+
 #endif

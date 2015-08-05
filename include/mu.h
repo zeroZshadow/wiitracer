@@ -43,6 +43,21 @@ static inline void muVecSub(register guVector *a, register guVector *b, register
 	);
 }
 
+static inline void muVecScale2(register guVector *src, register guVector *dst, f32 scale) {
+	register f32 i0, i1, i2;
+	asm(
+		"psq_l		%[i0], 0(%[src]), 0, 0;"
+		"psq_l		%[i1], 8(%[src]), 1, 0;"
+		"ps_muls0	%[i2], %[i0], %[scale];"
+		"psq_st		%[i2], 0(%[dst]), 0, 0;"
+		"ps_muls0	%[i2], %[i1], %[scale];"
+		"psq_st		%[i2], 8(%[dst]), 1, 0;"
+		: [i0] "=&f" (i0), [i1] "=&f" (i1), [i2] "=&f" (i2)
+		: [src] "r"(src), [dst] "r"(dst), [scale] "f"(scale)
+		: "memory"
+	);
+}
+
 static inline void muVecScale(register guVector *src, register guVector *dst, f32 scale) {
 	asm(
 		"psq_l		2, 0(%[src]), 0, 0;"

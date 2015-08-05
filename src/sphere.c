@@ -39,6 +39,6 @@ void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallbac
 		muVecScale(&info.normal, &info.normal, sphere->rcp_radius);
 		muVecNormalize(&info.normal);
 
-		callback(info, current);
+		callback(&info, current);
 	}
 }

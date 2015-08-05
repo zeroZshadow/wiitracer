@@ -144,8 +144,8 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	tracer->pass += 1.0;
 }
 
-void callback(hitinfo_t hitinfo, hitinfo_t *out) {
-	if (hitinfo.distance < out->distance) {
+void callback(hitinfo_t* hitinfo, hitinfo_t* out) {
+	if (hitinfo->distance < out->distance) {
 		*out = *hitinfo;
 	}
 }

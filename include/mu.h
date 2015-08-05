@@ -162,20 +162,20 @@ static inline void muVecMultiplySR(register Mtx mt, register guVector *src, regi
 
 static inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
 	register f32 result;
-	register f32 inter0, inter1, inter2, inter3;
+	register f32 i0, i1, i2, i3;
 	__asm__(
-		"psq_l            %[int1], 4(%[a]), 0, 0;"
-		"psq_l            %[int2], 4(%[b]), 0, 0;"
-		"ps_mul           %[int1], %[int1], %[int2];"
-		"psq_l            %[int3], 0(%[a]), 0, 0;"
-		"psq_l            %[int4], 0(%[b]), 0, 0;"
-		"ps_madd    %[int2], %[int3], %[int4], %[int1];"
-		"ps_sum0    %[res], %[int2], %[int1], %[int1];"
+		"psq_l      %[i0], 4(%[a]), 0, 0;"
+		"psq_l      %[i1], 4(%[b]), 0, 0;"
+		"ps_mul     %[i0], %[i0], %[i1];"
+		"psq_l      %[i2], 0(%[a]), 0, 0;"
+		"psq_l      %[i3], 0(%[b]), 0, 0;"
+		"ps_madd    %[i1], %[i2], %[i3], %[i0];"
+		"ps_sum0    %[res], %[i1], %[i0], %[i0];"
 		: [res] "=f"(result),
-		[int1] "=&f" (inter0),
-		[int2] "=&f" (inter1),
-		[int3] "=&f" (inter2),
-		[int4] "=&f" (inter3)
+		[i0] "=&f" (i0),
+		[i1] "=&f" (i1),
+		[i2] "=&f" (i2),
+		[i3] "=&f" (i3)
 		: [a]"r"(a), [b]"r"(b)
 	);
 	return result;

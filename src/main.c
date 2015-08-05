@@ -20,8 +20,8 @@ int main() { //int argc, char **argv) {
 	GXU_init();
 
 	// Frame buffer
-	u16 renderWidth = rmode->viWidth >> 0;
-	u16 renderHeight = rmode->viHeight >> 0;
+	u16 renderWidth = rmode->viWidth >> 1;
+	u16 renderHeight = rmode->viHeight >> 1;
 	printf("starting %u %u", renderWidth, renderHeight);
 	GXU_createPixelBuffer(renderWidth, renderHeight);
 	GXU_clearPixelBuffer(0xFF000000);

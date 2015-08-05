@@ -31,6 +31,6 @@ inline void PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcal
 		//normal = plane.normale
 		info.normal = plane->normal;
 
-		callback(info, current);
+		callback(&info, current);
 	}
 }

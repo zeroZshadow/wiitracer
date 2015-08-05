@@ -12,74 +12,60 @@
 static float NrmData[] = { 0.5, 3.0 };
 
 static inline void muVecAdd(register guVector *a, register guVector *b, register guVector *ab) {
-	asm(
+	asm volatile (
 		"psq_l		2, 0(%[a]), 0, 0;"
 		"psq_l		4, 0(%[b]), 0, 0;"
 		"ps_add		6, 2, 4;"
-		"psq_st		6, 0(%[ab]), 0, 0;"
+		"psq_st		6, %[ab], 0, 0;"
 		"psq_l		3, 8(%[a]), 1, 0;"
 		"psq_l		5, 8(%[b]), 1, 0;"
 		"ps_add		7, 3, 5;"
-		"psq_st		7, 8(%[ab]), 1, 0;"
-		:
-		: [a] "r"(a), [b] "r"(b), [ab] "r"(ab)
-		: "memory", "2", "3", "4", "5", "6", "7"
+		"psq_st		7, 8+%[ab], 1, 0;"
+		: [ab] "=o" (*ab)
+		: [a] "rf"(a), [b] "rf"(b)
+		: "2", "3", "4", "5", "6", "7"
 	);
 }
 
 static inline void muVecSub(register guVector *a, register guVector *b, register guVector *ab) {
-	asm(
+	asm volatile (
 		"psq_l		2, 0(%[a]), 0, 0;"
 		"psq_l		4, 0(%[b]), 0, 0;"
 		"ps_sub		6, 2, 4;"
-		"psq_st		6, 0(%[ab]), 0, 0;"
+		"psq_st		6, %[ab], 0, 0;"
 		"psq_l		3, 8(%[a]), 1, 0;"
 		"psq_l		5, 8(%[b]), 1, 0;"
 		"ps_sub		7, 3, 5;"
-		"psq_st		7, 8(%[ab]), 1, 0;"
-		:
-		: [a] "r"(a), [b] "r"(b), [ab] "r"(ab)
-		: "memory", "2", "3", "4", "5", "6", "7"
-	);
-}
-
-static inline void muVecScale2(register guVector *src, register guVector *dst, f32 scale) {
-	register f32 i0, i1, i2;
-	asm(
-		"psq_l		%[i0], 0(%[src]), 0, 0;"
-		"psq_l		%[i1], 8(%[src]), 1, 0;"
-		"ps_muls0	%[i2], %[i0], %[scale];"
-		"psq_st		%[i2], 0(%[dst]), 0, 0;"
-		"ps_muls0	%[i2], %[i1], %[scale];"
-		"psq_st		%[i2], 8(%[dst]), 1, 0;"
-		: [i0] "=&f" (i0), [i1] "=&f" (i1), [i2] "=&f" (i2)
-		: [src] "r"(src), [dst] "r"(dst), [scale] "f"(scale)
-		: "memory"
+		"psq_st		7, 8+%[ab], 1, 0;"
+		: [ab] "=o" (*ab)
+		: [a] "rf"(a), [b] "rf"(b)
+		: "2", "3", "4", "5", "6", "7"
 	);
 }
 
 static inline void muVecScale(register guVector *src, register guVector *dst, f32 scale) {
-	asm(
-		"psq_l		2, 0(%[src]), 0, 0;"
-		"psq_l		3, 8(%[src]), 1, 0;"
-		"ps_muls0	4, 2, %[scale];"
-		"psq_st		4, 0(%[dst]), 0, 0;"
-		"ps_muls0	4, 3, %[scale];"
-		"psq_st		4, 8(%[dst]), 1, 0;"
-		:
-		: [src] "r"(src), [dst] "r"(dst), [scale] "f"(scale)
-		: "memory", "2", "3", "4"
+	register f32 i0, i1, i2;
+	asm volatile (
+		"psq_l		%[i0], 0(%[src]), 0, 0;"
+		"psq_l		%[i1], 8(%[src]), 1, 0;"
+		"ps_muls0	%[i2], %[i0], %[scale];"
+		"psq_st		%[i2], %[dst], 0, 0;"
+		"ps_muls0	%[i2], %[i1], %[scale];"
+		"psq_st		%[i2], 8 + %[dst], 1, 0;"
+		: [dst] "=o" (*dst),
+		  [i0] "=&f" (i0), [i1] "=&f" (i1), [i2] "=&f" (i2)
+		: [src] "r"(src), [scale] "f"(scale)
 	);
 }
 
 //TODO: Wasting a register on NrmData adress, find out how to use directly from memory!
 static inline void muVecNormalize(register guVector *v) {
-	asm(
+	asm volatile (
 		"lfs		0, 0(%[data]);"
 		"lfs		1, 4(%[data]);"
-		"psq_l		2, 0(%[v]), 0, 0;"
+		"psq_l		2, %[v], 0, 0;"
 		"ps_mul		4, 2, 2;"
-		"psq_l		3, 8(%[v]), 1, 0;"
+		"psq_l		3, 8 +%[v], 1, 0;"
 		"ps_madd	5, 3, 3, 4;"
 		"ps_sum0	6, 5, 3, 4;"
 		"frsqrte	7, 6;"
@@ -88,17 +74,17 @@ static inline void muVecNormalize(register guVector *v) {
 		"fnmsubs	8, 8, 6, 1;"
 		"fmuls		7, 8, 9;"
 		"ps_muls0	2, 2, 7;"
-		"psq_st		2, 0(%[v]), 0, 0;"
+		"psq_st		2, %[v], 0, 0;"
 		"ps_muls0	3, 3, 7;"
-		"psq_st		3, 8(%[v]), 1, 0;"
-		:
-		: [v] "r"(v), [data] "r"(&NrmData)
-		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+		"psq_st		3, 8 + %[v], 1, 0;"
+		: [v] "+o" (*v)
+		: [data] "r"(&NrmData)
+		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
 	);
 }
 
 static inline void muVecCross(register guVector *a, register guVector *b, register guVector *axb) {
-	asm(
+	asm volatile (
 		"psq_l		1, 0(%[b]), 0, 0;"
 		"lfs		2, 8(%[a]);"
 		"psq_l		0, 0(%[a]), 0, 0;"
@@ -110,17 +96,17 @@ static inline void muVecCross(register guVector *a, register guVector *b, regist
 		"ps_msub	8, 0, 6, 7;"
 		"ps_merge11	9, 5, 5;"
 		"ps_merge01	10, 5, 8;"
-		"psq_st		9, 0(%[axb]), 1, 0;"
+		"psq_st		9, %[axb], 1, 0;"
 		"ps_neg		10, 10;"
-		"psq_st		10, 4(%[axb]), 0, 0;"
-		:
-		: [a] "r"(a), [b] "r"(b), [axb] "r"(axb)
-		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+		"psq_st		10, 4 + %[axb], 0, 0;"
+		: [axb] "=o"(*axb)
+		: [a] "r"(a), [b] "r"(b)
+		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
 	);
 }
 
 static inline void muVecMultiply(register Mtx mt, register guVector *src, register guVector *dst) {
-	asm(
+	asm volatile (
 		"psq_l		0, 0(%[src]), 0, 0;"
 		"psq_l		2, 0(%[mt]), 0, 0;"
 		"psq_l		1, 8(%[src]), 1, 0;"
@@ -131,24 +117,24 @@ static inline void muVecMultiply(register Mtx mt, register guVector *src, regist
 		"ps_sum0	6, 5, 6, 5;"
 		"psq_l		9, 24(%[mt]), 0, 0;"
 		"ps_mul		10, 8, 0;"
-		"psq_st		6, 0(%[dst]), 1, 0;"
+		"psq_st		6, %[dst], 1, 0;"
 		"ps_madd	11, 9, 1, 10;"
 		"psq_l		2, 32(%[mt]), 0, 0;"
 		"ps_sum0	12, 11, 12, 11;"
 		"psq_l		3, 40(%[mt]), 0, 0;"
 		"ps_mul		4, 3, 0;"
-		"psq_st		12, 4(%[dst]), 1, 0;"
+		"psq_st		12, 4 + %[dst], 1, 0;"
 		"ps_madd	5, 3, 1, 4;"
 		"ps_sum0	6, 5, 6, 5;"
-		"psq_st		6, 8(%[dst]), 1, 0;"
-		:
-		: [mt] "r"(mt), [src] "r"(src), [dst] "r"(dst)
-		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
+		"psq_st		6, 8 + %[dst], 1, 0;"
+		: [dst] "=o"(*dst)
+		: [mt] "r"(mt), [src] "r"(src)
+		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
 	);
 }
 
 static inline void muVecMultiplySR(register Mtx mt, register guVector *src, register guVector *dst) {
-	asm(
+	asm volatile (
 		"psq_l		0, 0(%[mt]), 0, 0;"
 		"psq_l		6, 0(%[src]), 0, 0;"
 		"psq_l		2, 16(%[mt]), 0, 0;"
@@ -164,21 +150,21 @@ static inline void muVecMultiplySR(register Mtx mt, register guVector *src, regi
 		"psq_l		1, 8(%[mt]), 0, 0;"
 		"ps_sum0	12, 12, 12, 12;"
 		"ps_madd	9, 1, 7, 8;"
-		"psq_st		9, 0(%[dst]), 1, 0 ;"
+		"psq_st		9, %[dst], 1, 0 ;"
 		"ps_madd	11, 3, 7, 10;"
-		"psq_st		11, 4(%[dst]), 1, 0 ;"
+		"psq_st		11, 4 %[dst], 1, 0 ;"
 		"ps_madd	13, 5, 7, 12;"
-		"psq_st		13, 8(%[dst]), 1, 0;"
-		:
-		: [mt] "r"(mt), [src] "r"(src), [dst] "r"(dst)
-		: "memory", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"
+		"psq_st		13, 8 + %[dst], 1, 0;"
+		: [dst] "=o"(*dst)
+		: [mt] "r"(mt), [src] "r"(src)
+		: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"
 	);
 }
 
 static inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
 	register f32 result;
 	register f32 i0, i1, i2, i3;
-	__asm__(
+	asm volatile (
 		"psq_l      %[i0], 4(%[a]), 0, 0;"
 		"psq_l      %[i1], 4(%[b]), 0, 0;"
 		"ps_mul     %[i0], %[i0], %[i1];"
@@ -200,10 +186,10 @@ static inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
 static inline f32 muSqrtf(register float val) {
 	register float res;
 	register float tmp;
-	asm("frsqrte %[tmp], %[in];"
+	asm volatile("frsqrte %[tmp], %[in];"
 		"fres %[out], %[tmp];"
-		: [out] "=f" (res),
-		  [tmp] "=f" (tmp)
+		: [out] "=rf" (res),
+		  [tmp] "=&rf" (tmp)
 		: [in] "f" (val)
 	);
 	return res;

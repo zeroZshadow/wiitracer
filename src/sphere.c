@@ -22,7 +22,7 @@ void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallbac
 	const f32 D = B * B - C;
 
 	if (D > 0.0f) {
-		const f32 dist = -B - sqrtf(D);
+		const f32 dist = -B - muSqrtf(D);
 		if (dist < 0.0f) return;
 
 		hitinfo_t info;

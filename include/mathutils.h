@@ -111,8 +111,6 @@ void guVecMin(guVector* vector, f32 min);
 
 void ps_vecAbs(guVector* vec, guVector* out);
 
-void ps_randScale(guVector* vec1, guVector* vec2, f32* rand, f32* mad);
-
 #endif
 
 

@@ -92,24 +92,3 @@ ps_vecAbs:
 	ps_abs		fr2, fr2
 	psq_st		fr2, 8(r4), 1, 0
 	blr
-
-	.globl ps_randScale
-	// r3 = vec1, r4 = vec2, r5 = rand, r6 = mad
-ps_randScale:
-	psq_l		fr1, 0(r5), 0, 0	// rand -> fr1
-	psq_l		fr2, 0(r3), 0, 0	// vec1 -> (fr2.0 fr2.1 fr3.1)
-	psq_l		fr3, 8(r3), 1, 0
-	psq_l		fr6, 0(r6), 0, 0	// mad -> fr6
-	ps_merge11	fr7, fr6, fr6		// (mad.1 mad.1) -> fr7
-	ps_madds0	fr1, fr1, fr6, fr7	// rand = rand * mad.0 + mad.1
-	ps_muls0	fr2, fr2, fr1		// First vector multiply
-	psq_st		fr2, 0(r3), 0, 0
-	ps_muls0	fr3, fr3, fr1
-	psq_st		fr3, 8(r3), 1, 0
-	psq_l		fr2, 0(r4), 0, 0	// vec2 -> (fr2.0 fr2.1 fr3.1)
-	psq_l		fr3, 8(r4), 1, 0
-	ps_muls1	fr2, fr2, fr1		// Second vector multiply
-	psq_st		fr2, 0(r4), 0, 0
-	ps_muls1	fr3, fr3, fr1
-	psq_st		fr3, 8(r4), 1, 0
-	blr

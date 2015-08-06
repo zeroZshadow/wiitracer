@@ -112,31 +112,30 @@ guVector Vector(f32 x, f32 y, f32 z) {
 	return res;
 }
 
+u32 seed = 0xDEADBEEF;
 f32 fioraRand() {
-	static u32 seed = 0xDEADBEEF;
 	seed = 214013 * seed + 2531011;
-	const u32 temp = (seed & 0x007FFFFF) | 0x3F800000;
+	u32 temp = (seed & 0x007FFFFF) | 0x3F800000;
 	return *(f32*)&temp - 1.0f;
 }
 
 guVector RandomVectorInHemisphere(guVector* normal) {
 	// Jacco Bikker
 	// Altered by Martijn Gerkes
-	guVector T, B, N;
-	N = *normal;
-	vecPerpendicular(normal, &T);
-	muVecCross(&T, normal, &B);
+	guVector A, B;
+
+	vecPerpendicular(normal, &A);
+	muVecCross(&A, normal, &B);
 
 	f32 rand[2] = { fioraRand(), fioraRand() };
-	f32 mad[2] = { 2.0f, -1.0f };
 
-	ps_randScale(&T, &B, rand, mad);
-	muVecAdd(&T, &B, &B);
-	muVecSub(&B, &N, &N);
-	muVecNormalize(&N);
-	muVecScale(&N, &N, -1.0f);
+	muRandScale(&A, &B, rand);
+	muVecAdd(&A, &B, &B);
+	muVecSub(&B, normal, &B);
+	muVecNormalize(&B);
+	muVecInvert(&B, &B);
 
-	return N;
+	return B;
 }
 
 void guVecMax(guVector* vector, f32 max) {

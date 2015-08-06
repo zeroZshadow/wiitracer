@@ -40,9 +40,6 @@
     <Filter Include="Header Files\profiler">
       <UniqueIdentifier>{e9e2e083-1973-4992-b0d1-3fca435f58d9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DSP Files">
-      <UniqueIdentifier>{f1b6a650-ae85-4888-b750-2ce3e8015fbd}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -89,9 +86,6 @@
     <None Include="Makefile" />
     <None Include=".gitignore" />
     <None Include="MakefileWii" />
-    <None Include="dsp\test.dsp">
-      <Filter>DSP Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gxutils.h">

@@ -77,7 +77,11 @@ void PATH_generateRays(pathtracer_t* tracer) {
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					// Calculate direction
-					guVector rpos = { (VBlock * (float)(x + ix + fioraRand())), (HBlock * (float)(y + iy + fioraRand())), 0 };
+					guVector rpos = {
+						VBlock * ( (float)(x + ix) + fioraRand()),
+						HBlock * ( (float)(y + iy) + fioraRand()),
+						0
+					};
 					guVector* direction = &tracer->rays[i].direction;
 
 					// Calculate direction

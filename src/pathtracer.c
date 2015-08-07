@@ -66,8 +66,8 @@ void PATH_generateRays(pathtracer_t* tracer) {
 	muVecSub(&camera->point1, &camera->point0, &delta);
 
 	// Create all ray data as identity
-	const f32 HBlock = delta.y / (f32)RayVCount;
-	const f32 VBlock = delta.x / (f32)RayHCount;
+	const f32 VBlock = delta.y / (f32)RayVCount;
+	const f32 HBlock = delta.x / (f32)RayHCount;
 
 	// Rays are tiled because of how the texture works
 	u32 i = 0;
@@ -79,15 +79,18 @@ void PATH_generateRays(pathtracer_t* tracer) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					// Calculate direction
 					guVector rpos;
-					rpos.x = VBlock * ((float)(x + ix) + 0.5f );
-					rpos.y = HBlock * ((float)(y + iy) + 0.5f );
+					rpos.x = HBlock * ((float)(x + ix) + FncMtRandR32());
+					rpos.y = VBlock * ((float)(y + iy) + FncMtRandR32());
 					rpos.z = 0;
 
 					// Calculate direction
 					guVector direction;
+
+					//SOMETHING HERE FUCKS UP
 					muVecAdd(&rpos, &camera->point0, &direction);
 					muVecSub(&direction, &camera->position, &direction);
 					muVecNormalize(&direction);
+					//END
 
 					// Set Ray origin
 					tracer->rays[i].direction = direction;
@@ -137,9 +140,8 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 				}
 			}
 
-
 			//Entire tile traced, write to texture
-			GXU_copyTilePixelBuffer((u32*)datatile, x / TILESIZE, y / TILESIZE);
+			GXU_copyTilePixelBuffer(datatile, x / TILESIZE, y / TILESIZE);
 		}
 	}
 

@@ -33,7 +33,7 @@ void GXU_createPixelBuffer(u16 width, u16 height);
 
 void GXU_clearPixelBuffer(u32 color);
 
-u32 GXU_copyTilePixelBuffer(u32* tileData, u32 tilex, u32 tiley);
+u32 GXU_copyTilePixelBuffer(GXColor* tileData, u32 tilex, u32 tiley);
 
 void GXU_renderPixelBuffer();
 

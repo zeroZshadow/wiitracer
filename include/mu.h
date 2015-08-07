@@ -14,45 +14,45 @@ static f32 RandMad[] = { 2.0f, -1.0f };
 
 static inline void muVecAdd(register guVector *a, register guVector *b, register guVector *ab) {
 	register f32 f0, f1, f2, f3, f4, f5;
-	asm (
+	asm volatile(
 		"psq_l		%[f0], 0(%[a]), 0, 0;"
 		"psq_l		%[f1], 0(%[b]), 0, 0;"
 		"ps_add		%[f2], %[f0], %[f1];"
-		"psq_st		%[f2], 0(%[ab]), 0, 0;"
+		"psq_st		%[f2], %[ab], 0, 0;"
 		"psq_l		%[f3], 8(%[a]), 1, 0;"
 		"psq_l		%[f4], 8(%[b]), 1, 0;"
 		"ps_add		%[f5], %[f3], %[f4];"
-		"psq_st		%[f5], 8(%[ab]), 1, 0;"
-		: "=o" (*ab),
-		  [f0] "=&fr" (f0),
-		  [f1] "=&fr" (f1),
-		  [f2] "=&fr" (f2),
-		  [f3] "=&fr" (f3),
-		  [f4] "=&fr" (f4),
-		  [f5] "=&fr" (f5)
-		: [a] "r"(a), [b] "r"(b), [ab] "rf" (ab)
+		"psq_st		%[f5], 8 + %[ab], 1, 0;"
+		: [ab] "=o" (*ab),
+		  [f0] "=&f" (f0),
+		  [f1] "=&f" (f1),
+		  [f2] "=&f" (f2),
+		  [f3] "=&f" (f3),
+		  [f4] "=&f" (f4),
+		  [f5] "=&f" (f5)
+		: [a] "r"(a), [b] "r"(b)
 	);
 }
 
 static inline void muVecSub(register guVector *a, register guVector *b, register guVector *ab) {
 	register f32 f0, f1, f2, f3, f4, f5;
-	asm (
+	asm volatile(
 		"psq_l		%[f0], 0(%[a]), 0, 0;"
 		"psq_l		%[f1], 0(%[b]), 0, 0;"
 		"ps_sub		%[f2], %[f0], %[f1];"
-		"psq_st		%[f2], 0(%[ab]), 0, 0;"
+		"psq_st		%[f2], %[ab], 0, 0;"
 		"psq_l		%[f3], 8(%[a]), 1, 0;"
 		"psq_l		%[f4], 8(%[b]), 1, 0;"
 		"ps_sub		%[f5], %[f3], %[f4];"
-		"psq_st		%[f5], 8(%[ab]), 1, 0;"
-		: "=o" (*ab),
-		  [f0] "=&fr" (f0),
-		  [f1] "=&fr" (f1),
-		  [f2] "=&fr" (f2),
-		  [f3] "=&fr" (f3),
-		  [f4] "=&fr" (f4),
-		  [f5] "=&fr" (f5)
-		: [a] "r"(a), [b] "r"(b), [ab] "rf" (ab)
+		"psq_st		%[f5], 8 + %[ab], 1, 0;"
+		: [ab] "=o" (*ab),
+		  [f0] "=&f" (f0),
+		  [f1] "=&f" (f1),
+		  [f2] "=&f" (f2),
+		  [f3] "=&f" (f3),
+		  [f4] "=&f" (f4),
+		  [f5] "=&f" (f5)
+		: [a] "r"(a), [b] "r"(b)
 	);
 }
 
@@ -64,11 +64,11 @@ static inline void muVecScale(register guVector *src, register guVector *dst, f3
 		"ps_muls0	%[i2], %[i0], %[scale];"
 		"psq_st		%[i2], %[dst], 0, 0;"
 		"ps_muls0	%[i2], %[i1], %[scale];"
-		"psq_st		%[i2], 8 + %[dst], 1, 0;"
-		: [dst] "=o>" (*dst),
-		  [i0] "=&fr" (i0),
-		  [i1] "=&fr" (i1),
-		  [i2] "=&fr" (i2)
+		"psq_st		%[i2], 8 +%[dst], 1, 0;"
+		: [dst] "=o" (*dst),
+		  [i0] "=&f" (i0),
+		  [i1] "=&f" (i1),
+		  [i2] "=&f" (i2)
 		: [src] "r"(src), [scale] "f"(scale)
 	);
 }
@@ -82,23 +82,23 @@ static inline void muVecInvert(register guVector *src, register guVector *dst) {
 		"psq_st		%[i2], %[dst], 0, 0;"
 		"ps_neg		%[i2], %[i1];"
 		"psq_st		%[i2], 8 + %[dst], 1, 0;"
-		: [dst] "=o>" (*dst),
-		[i0] "=&fr" (i0),
-		[i1] "=&fr" (i1),
-		[i2] "=&fr" (i2)
+		: [dst] "=o" (*dst),
+		  [i0] "=&f" (i0),
+		  [i1] "=&f" (i1),
+		  [i2] "=&f" (i2)
 		: [src] "r"(src)
-		);
+	);
 }
 
 //TODO: Wasting a register on NrmData adress, find out how to use directly from memory!
 static inline void muVecNormalize(register guVector *v) {
 	register f32 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9;
-	asm (
+	asm volatile(
 		"lfs		%[f0], 0(%[normal]);"
 		"lfs		%[f1], 4(%[normal]);"
-		"psq_l		%[f2], 0(%[v]), 0, 0;"
+		"psq_l		%[f2], %[v], 0, 0;"
 		"ps_mul		%[f4], %[f2], %[f2];"
-		"psq_l		%[f3], 8(%[v]), 1, 0;"
+		"psq_l		%[f3], 8 + %[v], 1, 0;"
 		"ps_madd	%[f5], %[f3], %[f3], %[f4];"
 		"ps_sum0	%[f6], %[f5], %[f3], %[f4];"
 		"frsqrte	%[f7], %[f6];"
@@ -107,22 +107,21 @@ static inline void muVecNormalize(register guVector *v) {
 		"fnmsubs	%[f8], %[f8], %[f6], %[f1];"
 		"fmuls		%[f7], %[f8], %[f9];"
 		"ps_muls0	%[f2], %[f2], %[f7];"
-		"psq_st		%[f2], 0(%[v]), 0, 0;"
+		"psq_st		%[f2], %[v], 0, 0;"
 		"ps_muls0	%[f3], %[f3], %[f7];"
-		"psq_st		%[f3], 8(%[v]), 1, 0;"
-		: "+o" (*v),
-		  [f0] "=&fr" (f0),
-		  [f1] "=&fr" (f1),
-		  [f2] "=&fr" (f2),
-		  [f3] "=&fr" (f3),
-		  [f4] "=&fr" (f4),
-		  [f5] "=&fr" (f5),
-		  [f6] "=&fr" (f6),
-		  [f7] "=&fr" (f7),
-		  [f8] "=&fr" (f8),
-		  [f9] "=&fr" (f9)
-		: [normal] "r" (NrmData),
-		  [v] "rf" (v)
+		"psq_st		%[f3], 8 + %[v], 1, 0;"
+		: [v] "+o" (*v),
+		  [f0] "=&f" (f0),
+		  [f1] "=&f" (f1),
+		  [f2] "=&f" (f2),
+		  [f3] "=&f" (f3),
+		  [f4] "=&f" (f4),
+		  [f5] "=&f" (f5),
+		  [f6] "=&f" (f6),
+		  [f7] "=&f" (f7),
+		  [f8] "=&f" (f8),
+		  [f9] "=&f" (f9)
+		: [normal] "r" (NrmData)
 	);
 }
 
@@ -143,18 +142,18 @@ static inline void muVecCross(register guVector *a, register guVector *b, regist
 		"psq_st		%[f9], %[axb], 1, 0;"
 		"ps_neg		%[f10], %[f10];"
 		"psq_st		%[f10], 4 + %[axb], 0, 0;"
-		: [axb] "=o>"(*axb),
-		  [f0] "=&fr" (f0),
-		  [f1] "=&fr" (f1),
-		  [f2] "=&fr" (f2),
-		  [f3] "=&fr" (f3),
-		  [f4] "=&fr" (f4),
-		  [f5] "=&fr" (f5),
-		  [f6] "=&fr" (f6),
-		  [f7] "=&fr" (f7),
-		  [f8] "=&fr" (f8),
-		  [f9] "=&fr" (f9),
-		  [f10] "=&fr" (f10)
+		: [axb] "=o"(*axb),
+		  [f0] "=&f" (f0),
+		  [f1] "=&f" (f1),
+		  [f2] "=&f" (f2),
+		  [f3] "=&f" (f3),
+		  [f4] "=&f" (f4),
+		  [f5] "=&f" (f5),
+		  [f6] "=&f" (f6),
+		  [f7] "=&f" (f7),
+		  [f8] "=&f" (f8),
+		  [f9] "=&f" (f9),
+		  [f10] "=&f" (f10)
 		: [a] "r"(a), [b] "r"(b)
 	);
 }
@@ -182,20 +181,20 @@ static inline void muVecMultiply(register Mtx mt, register guVector *src, regist
 		"ps_madd	%[f5], %[f3], %[f1], %[f4];"
 		"ps_sum0	%[f6], %[f5], %[f6], %[f5];"
 		"psq_st		%[f6], 8 + %[dst], 1, 0;"
-		: [dst] "=o>"(*dst),
-		[f0] "=&fr" (f0),
-		[f1] "=&fr" (f1),
-		[f2] "=&fr" (f2),
-		[f3] "=&fr" (f3),
-		[f4] "=&fr" (f4),
-		[f5] "=&fr" (f5),
-		[f6] "=&fr" (f6),
-		[f7] "=&fr" (f7),
-		[f8] "=&fr" (f8),
-		[f9] "=&fr" (f9),
-		[f10] "=&fr" (f10),
-		[f11] "=&fr" (f11),
-		[f12] "=&fr" (f12)
+		: [dst] "=o"(*dst),
+		[f0] "=&f" (f0),
+		[f1] "=&f" (f1),
+		[f2] "=&f" (f2),
+		[f3] "=&f" (f3),
+		[f4] "=&f" (f4),
+		[f5] "=&f" (f5),
+		[f6] "=&f" (f6),
+		[f7] "=&f" (f7),
+		[f8] "=&f" (f8),
+		[f9] "=&f" (f9),
+		[f10] "=&f" (f10),
+		[f11] "=&f" (f11),
+		[f12] "=&f" (f12)
 		: [mt] "r"(mt), [src] "r"(src)
 	);
 }
@@ -223,21 +222,21 @@ static inline void muVecMultiplySR(register Mtx mt, register guVector *src, regi
 		"psq_st		%[f11], 4 %[dst], 1, 0 ;"
 		"ps_madd	%[f13], %[f5], %[f7], %[f12];"
 		"psq_st		%[f13], 8 + %[dst], 1, 0;"
-		: [dst] "=o>"(*dst),
-		[f0] "=&fr" (f0),
-		[f1] "=&fr" (f1),
-		[f2] "=&fr" (f2),
-		[f3] "=&fr" (f3),
-		[f4] "=&fr" (f4),
-		[f5] "=&fr" (f5),
-		[f6] "=&fr" (f6),
-		[f7] "=&fr" (f7),
-		[f8] "=&fr" (f8),
-		[f9] "=&fr" (f9),
-		[f10] "=&fr" (f10),
-		[f11] "=&fr" (f11),
-		[f12] "=&fr" (f12),
-		[f13] "=&fr" (f13)
+		: [dst] "=o"(*dst),
+		[f0] "=&f" (f0),
+		[f1] "=&f" (f1),
+		[f2] "=&f" (f2),
+		[f3] "=&f" (f3),
+		[f4] "=&f" (f4),
+		[f5] "=&f" (f5),
+		[f6] "=&f" (f6),
+		[f7] "=&f" (f7),
+		[f8] "=&f" (f8),
+		[f9] "=&f" (f9),
+		[f10] "=&f" (f10),
+		[f11] "=&f" (f11),
+		[f12] "=&f" (f12),
+		[f13] "=&f" (f13)
 		: [mt] "r"(mt), [src] "r"(src)
 	);
 }
@@ -253,11 +252,11 @@ static inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
 		"psq_l      %[f3], 0(%[b]), 0, 0;"
 		"ps_madd    %[f1], %[f2], %[f3], %[f0];"
 		"ps_sum0    %[res], %[f1], %[f0], %[f0];"
-		: [res] "=f"(result),
-		  [f0] "=&fr" (f0),
-		  [f1] "=&fr" (f1),
-		  [f2] "=&fr" (f2),
-		  [f3] "=&fr" (f3)
+		: [res] "=f" (result),
+		  [f0] "=&f" (f0),
+		  [f1] "=&f" (f1),
+		  [f2] "=&f" (f2),
+		  [f3] "=&f" (f3)
 		: [a]"r"(a), [b]"r"(b)
 	);
 	return result;
@@ -276,7 +275,7 @@ static inline f32 muSqrtf(register float val) {
 
 static inline void muRandScale(register guVector *a, register guVector *b, register f32* rand) {
 	register f32 f0, f1, f2, f3, f4, f5;
-	asm volatile(
+	asm (
 		"psq_l		%[f0], 0(%[rand]), 0, 0;"
 		"psq_l		%[f1], %[a], 0, 0;"
 		"psq_l		%[f2], 8 + %[a], 1, 0;"
@@ -294,13 +293,13 @@ static inline void muRandScale(register guVector *a, register guVector *b, regis
 		"psq_st		%[f1], %[b], 0, 0;"
 		"ps_muls1	%[f2], %[f2], %[f0];"
 		"psq_st		%[f2], 8 + %[b], 1, 0;"
-		: [a] "+o>" (*a), [b] "+o>" (*b),
-		[f0] "=&fr" (f0),
-		[f1] "=&fr" (f1),
-		[f2] "=&fr" (f2),
-		[f3] "=&fr" (f3),
-		[f4] "=&fr" (f4),
-		[f5] "=&fr" (f5)
+		: [a] "+o" (*a), [b] "+o" (*b),
+		[f0] "=f" (f0),
+		[f1] "=f" (f1),
+		[f2] "=f" (f2),
+		[f3] "=f" (f3),
+		[f4] "=f" (f4),
+		[f5] "=f" (f5)
 		: [rand] "r" (rand), [mad] "r" (RandMad)
 	);
 }

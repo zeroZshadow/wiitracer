@@ -127,9 +127,10 @@ guVector RandomVectorInHemisphere(guVector* normal) {
 	vecPerpendicular(normal, &A);
 	muVecCross(&A, normal, &B);
 
-	f32 rand[2] = { fioraRand(), fioraRand() };
+	f32 rand[2] = { FncMtRandR32(), FncMtRandR32() };
 
 	muRandScale(&A, &B, rand);
+
 	muVecAdd(&A, &B, &B);
 	muVecSub(&B, normal, &B);
 	muVecNormalize(&B);

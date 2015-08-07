@@ -16,6 +16,6 @@ typedef struct {
 
 void SPHERE_init(sphere_t* sphere, guVector position, f32 radius, material_t material);
 
-void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallback(callback));
+void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current);
 
 #endif

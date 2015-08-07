@@ -89,7 +89,7 @@ inline f32 vecDistance(guVector* point1, guVector* point2) {
 
 inline u8 vecMinAxis(guVector* vec) {
 	guVector abs;
-	ps_vecAbs(vec, &abs);
+	muVecAbs(vec, &abs);
 	return (abs.x <= abs.y ? (abs.x <= abs.z ? 0 : 2) : (abs.y <= abs.z) ? 1 : 2);
 }
 

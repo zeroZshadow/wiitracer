@@ -33,7 +33,7 @@ void GXU_createPixelBuffer(u16 width, u16 height);
 
 void GXU_clearPixelBuffer(u32 color);
 
-u32 GXU_copyTilePixelBuffer(GXColor* tileData, u32 tilex, u32 tiley);
+void GXU_copyTilePixelBuffer(GXColor* tileData, u32 tilex, u32 tiley);
 
 void GXU_renderPixelBuffer();
 
@@ -41,8 +41,8 @@ void GXU_renderPixelBuffer();
  */
 void GXU_done();
 
-guVector GXU_blendColors(guVector c1, guVector c2, f32 blend);
+void GXU_blendColors(guVector* c1, guVector* c2, guVector* result, f32 blend);
 
-GXColor GXU_vectorToColorData(guVector color);
+GXColor GXU_vectorToColorData(guVector* color);
 
 #endif

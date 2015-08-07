@@ -9,10 +9,10 @@
 
 #include <ogc/gu.h>
 
-static f32 NrmData[] = { 0.5, 3.0 };
-static f32 RandMad[] = { 2.0f, -1.0f };
+static const f32 NrmData[] = { 0.5, 3.0 };
+static const f32 RandMad[] = { 2.0f, -1.0f };
 
-static inline void muVecAdd(register guVector *a, register guVector *b, register guVector *ab) {
+static inline void muVecAdd(guVector *a, guVector *b, guVector *ab) {
 	register f32 f0, f1, f2, f3, f4, f5;
 	asm volatile(
 		"psq_l		%[f0], 0(%[a]), 0, 0;"
@@ -34,7 +34,7 @@ static inline void muVecAdd(register guVector *a, register guVector *b, register
 	);
 }
 
-static inline void muVecSub(register guVector *a, register guVector *b, register guVector *ab) {
+static inline void muVecSub(guVector *a, guVector *b, guVector *ab) {
 	register f32 f0, f1, f2, f3, f4, f5;
 	asm volatile(
 		"psq_l		%[f0], 0(%[a]), 0, 0;"
@@ -56,7 +56,7 @@ static inline void muVecSub(register guVector *a, register guVector *b, register
 	);
 }
 
-static inline void muVecScale(register guVector *src, register guVector *dst, f32 scale) {
+static inline void muVecScale(guVector *src, guVector *dst, f32 scale) {
 	register f32 i0, i1, i2;
 	asm volatile(
 		"psq_l		%[i0], 0(%[src]), 0, 0;"
@@ -73,7 +73,7 @@ static inline void muVecScale(register guVector *src, register guVector *dst, f3
 	);
 }
 
-static inline void muVecInvert(register guVector *src, register guVector *dst) {
+static inline void muVecInvert(guVector *src, guVector *dst) {
 	register f32 i0, i1, i2;
 	asm volatile(
 		"psq_l		%[i0], 0(%[src]), 0, 0;"
@@ -91,7 +91,7 @@ static inline void muVecInvert(register guVector *src, register guVector *dst) {
 }
 
 //TODO: Wasting a register on NrmData adress, find out how to use directly from memory!
-static inline void muVecNormalize(register guVector *v) {
+static inline void muVecNormalize(guVector *v) {
 	register f32 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9;
 	asm volatile(
 		"lfs		%[f0], 0(%[normal]);"
@@ -125,7 +125,7 @@ static inline void muVecNormalize(register guVector *v) {
 	);
 }
 
-static inline void muVecCross(register guVector *a, register guVector *b, register guVector *axb) {
+static inline void muVecCross(guVector *a, guVector *b, guVector *axb) {
 	register f32 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10;
 	asm volatile(
 		"psq_l		%[f1], 0(%[b]), 0, 0;"
@@ -158,7 +158,7 @@ static inline void muVecCross(register guVector *a, register guVector *b, regist
 	);
 }
 
-static inline void muVecMultiply(register Mtx mt, register guVector *src, register guVector *dst) {
+static inline void muVecMultiply(Mtx mt, guVector *src, guVector *dst) {
 	register f32 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12;
 	asm volatile(
 		"psq_l		%[f0], 0(%[src]), 0, 0;"
@@ -199,7 +199,7 @@ static inline void muVecMultiply(register Mtx mt, register guVector *src, regist
 	);
 }
 
-static inline void muVecMultiplySR(register Mtx mt, register guVector *src, register guVector *dst) {
+static inline void muVecMultiplySR(Mtx mt, guVector *src, guVector *dst) {
 	register f32 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13;
 	asm volatile(
 		"psq_l		%[f0], 0(%[mt]), 0, 0;"
@@ -241,7 +241,7 @@ static inline void muVecMultiplySR(register Mtx mt, register guVector *src, regi
 	);
 }
 
-static inline f32 muVecDotProduct(register guVector *a, register guVector *b) {
+static inline f32 muVecDotProduct(guVector *a, guVector *b) {
 	register f32 result;
 	register f32 f0, f1, f2, f3;
 	asm volatile(
@@ -273,7 +273,7 @@ static inline f32 muSqrtf(register float val) {
 	return res;
 }
 
-static inline void muRandScale(register guVector *a, register guVector *b, register f32* rand) {
+static inline void muRandScale(guVector *a, guVector *b, f32* rand) {
 	register f32 f0, f1, f2, f3, f4, f5;
 	asm (
 		"psq_l		%[f0], 0(%[rand]), 0, 0;"
@@ -301,6 +301,40 @@ static inline void muRandScale(register guVector *a, register guVector *b, regis
 		[f4] "=f" (f4),
 		[f5] "=f" (f5)
 		: [rand] "r" (rand), [mad] "r" (RandMad)
+	);
+}
+
+static inline void muVecAbs(guVector *src, guVector *dst) {
+	register f32 f0, f1;
+	asm(
+		"psq_l		%[f0], 0(%[src]), 0, 0;"
+		"psq_l		%[f1], 8(%[src]), 1, 0;"
+		"ps_abs		%[f0], %[f0];"
+		"psq_st		%[f0], %[dst], 0, 0;"
+		"ps_abs		%[f1], %[f1];"
+		"psq_st		%[f1], 8 + %[dst], 1, 0;"
+		: [dst] "=o" (*dst),
+		[f0] "=f" (f0),
+		[f1] "=f" (f1)
+		: [src] "r" (src)
+	);
+}
+
+static inline void muVecMulVec(guVector *a, guVector *b, guVector *dst) {
+	register f32 f0, f1;
+	asm volatile(
+		"psq_l %[f0], 0(%[a]), 0, 0;"
+		"psq_l %[f1], 0(%[b]), 0, 0;"
+		"ps_mul %[f0], %[f0], %[f1];"
+		"psq_st %[f0], %[dst], 0, 0;"
+		"psq_l %[f0], 8(%[a]), 1, 0;"
+		"psq_l %[f1], 8(%[b]), 1, 0;"
+		"ps_mul %[f0], %[f0], %[f1];"
+		"psq_st %[f0], 8 + %[dst], 1, 0;"
+		: [dst] "=o" (*dst),
+		[f0] "=&f" (f0),
+		[f1] "=&f" (f1)
+		: [a] "r"(a), [b] "r"(b)
 	);
 }
 

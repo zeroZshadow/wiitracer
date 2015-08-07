@@ -121,20 +121,18 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					const u32 index = (x + ix) + ((y + iy) * RayHCount);
 					ray_t* ray = &tracer->rays[i];
-					guVector pixel = tracer->fbuffer[index];
+					guVector* pixel = &tracer->fbuffer[index];
 
 					//Get pixel color for tile
-					const guVector color = PATH_trace(ray, scene);
+					guVector color = PATH_trace(ray, scene);
 
 					//Blend with old pixel
-					pixel = GXU_blendColors(color, pixel, blendvalue);
-
-					//Store pixel back
-					tracer->fbuffer[index] = pixel;
+					GXU_blendColors(&color, pixel, pixel, blendvalue);
 
 					//Convert to u32
-					guVecMax(&pixel, 1.0f);
-					guVecMin(&pixel, 0.0f);
+					//TODO: WRITE CLAMP IN PSQ
+					guVecMax(pixel, 1.0f);
+					guVecMin(pixel, 0.0f);
 					datatile[ix + (iy * TILESIZE)] = GXU_vectorToColorData(pixel);
 					++i;
 				}
@@ -148,15 +146,9 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	tracer->pass += 1.0;
 }
 
-void callback(hitinfo_t* hitinfo, hitinfo_t* out) {
-	if (hitinfo->distance < out->distance) {
-		*out = *hitinfo;
-	}
-}
-
+const guVector black = { 0, 0, 0 };
 guVector PATH_trace(ray_t* ray, scene_t* scene) {
 	guVector color = { 1, 1, 1 };
-	const guVector black = { 0, 0, 0 };
 	ray_t currentRay;
 	f32 cost = 1.0f;
 	currentRay.origin = ray->origin;
@@ -169,11 +161,11 @@ guVector PATH_trace(ray_t* ray, scene_t* scene) {
 		hitinfo.distance = INFINITY;
 		hitinfo.hit = FALSE;
 
-		for (i = 0; i < scene->spherecount; ++i) {
-			SPHERE_raycast(&scene->spheres[i], &currentRay, &hitinfo, callback);
-		}
 		for (i = 0; i < scene->planecount; ++i) {
-			PLANE_raycast(&scene->planes[i], &currentRay, &hitinfo, callback);
+			PLANE_raycast(&scene->planes[i], &currentRay, &hitinfo);
+		}
+		for (i = 0; i < scene->spherecount; ++i) {
+			SPHERE_raycast(&scene->spheres[i], &currentRay, &hitinfo);
 		}
 
 		if (hitinfo.hit == FALSE) {
@@ -183,14 +175,13 @@ guVector PATH_trace(ray_t* ray, scene_t* scene) {
 
 		// Alter the current color
 		muVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
-		ps_float3Mul(&color, &hitinfo.material.color, &color);
+		muVecMulVec(&color, &hitinfo.material.color, &color);
 
 		if (hitinfo.material.emissive > 0.0f) {
 			muVecScale(&color, &color, hitinfo.material.emissive);
 			return color;
 		}
 
-		//TODO: Holy shit this is slow
 		currentRay.direction = RandomVectorInHemisphere(&hitinfo.normal);
 		currentRay.origin = hitinfo.position;
 

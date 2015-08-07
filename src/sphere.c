@@ -11,13 +11,13 @@ void SPHERE_init(sphere_t* sphere, guVector position, f32 radius, material_t mat
 	sphere->rcp_radius = 1.0f / radius;
 }
 
-void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallback(callback)) {
-	guVector distance;
-	muVecSub(&ray->origin, &sphere->position, &distance);
+void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current) {
+	guVector delta;
+	muVecSub(&ray->origin, &sphere->position, &delta);
 
 	f32 B, C;
-	B = muVecDotProduct(&distance, &ray->direction);
-	C = muVecDotProduct(&distance, &distance);
+	B = muVecDotProduct(&delta, &ray->direction);
+	C = muVecDotProduct(&delta, &delta);
 	C -= sphere->sqr_radius;
 	const f32 D = B * B - C;
 
@@ -25,20 +25,17 @@ void SPHERE_raycast(sphere_t* sphere, ray_t* ray, hitinfo_t* current, hitcallbac
 		const f32 dist = -B - muSqrtf(D);
 		if (dist < 0.0f) return;
 
-		hitinfo_t info;
-		info.material = sphere->material;
-		info.distance = dist;
-		info.hit = TRUE;
-		
-		//position = ray.origin + (ray.direction * distance)
-		muVecScale(&ray->direction, &info.position, dist);
-		muVecAdd(&ray->origin, &info.position, &info.position);
+		if (dist < current->distance) {
+			current->material = sphere->material;
+			current->distance = dist;
 
-		//normal = (hitpos - pos) * rpc_radius
-		muVecSub(&info.position, &sphere->position, &info.normal);
-		muVecScale(&info.normal, &info.normal, sphere->rcp_radius);
-		muVecNormalize(&info.normal);
+			muVecScale(&ray->direction, &current->position, dist);
+			muVecAdd(&ray->origin, &current->position, &current->position);
 
-		callback(&info, current);
+			muVecSub(&current->position, &sphere->position, &current->normal);
+			muVecScale(&current->normal, &current->normal, sphere->rcp_radius);
+
+			current->hit = TRUE;
+		}
 	}
 }

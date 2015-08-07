@@ -14,6 +14,6 @@ typedef struct {
 
 void PLANE_init(plane_t* plane, guVector position, guVector normal, material_t material);
 
-void PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current, hitcallback(callback));
+void PLANE_raycast(plane_t* plane, ray_t* ray, hitinfo_t* current);
 
 #endif

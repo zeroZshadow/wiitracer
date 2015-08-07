@@ -109,8 +109,6 @@ void guVecMax(guVector* vector, f32 max);
 
 void guVecMin(guVector* vector, f32 min);
 
-void ps_vecAbs(guVector* vec, guVector* out);
-
 #endif
 
 

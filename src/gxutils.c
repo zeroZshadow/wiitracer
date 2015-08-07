@@ -131,7 +131,7 @@ void GXU_clearPixelBuffer(u32 color) {
 	}
 }
 
-u32 GXU_copyTilePixelBuffer(GXColor* tileData, u32 tilex, u32 tiley) {
+void GXU_copyTilePixelBuffer(GXColor* tileData, u32 tilex, u32 tiley) {
 	u16 ix, iy;
 	u16* colorBuffer = screenBuffer;
 	u32* data = (u32*)tileData;
@@ -139,7 +139,6 @@ u32 GXU_copyTilePixelBuffer(GXColor* tileData, u32 tilex, u32 tiley) {
 	const u32 widthtiles = screenWidth / TILESIZE;
 	const u32 looplength = TILESIZE * TILESIZE;
 	u32 index = (tilex + (tiley * widthtiles)) * (looplength) << 1;
-	GX_InvalidateTexAll();
 
 	for (iy = 0; iy < TILESIZE; ++iy) {
 		for (ix = 0; ix < TILESIZE; ++ix) {
@@ -152,7 +151,7 @@ u32 GXU_copyTilePixelBuffer(GXColor* tileData, u32 tilex, u32 tiley) {
 		}
 	}
 
-	return index + TILESIZE * TILESIZE;
+	GX_InvalidateTexAll();
 }
 
 void GXU_renderPixelBuffer() {
@@ -205,17 +204,16 @@ GXRModeObj* GXU_getMode() {
 	return rmode;
 }
 
-guVector GXU_blendColors(guVector c1, guVector c2, f32 blend) {
-	guVector res, delta;
-	guVecSub(&c2, &c1, &delta);
-	guVecScale(&delta, &delta, blend);
-	guVecAdd(&c1, &delta, &res);
-	return res;
+void GXU_blendColors(guVector* c1, guVector* c2, guVector* result, f32 blend) {
+	//Abuse the result vector for temp storage of the delta c2-c1
+	guVecSub(c2, c1, result);
+	guVecScale(result, result, blend);
+	guVecAdd(c1, result, result);
 }
 
-GXColor GXU_vectorToColorData(guVector color) {
+GXColor GXU_vectorToColorData(guVector* color) {
 	guVector mul;
-	muVecScale(&color, &mul, 255.0f);
-	GXColor res = { 0xFF, mul.x, mul.y, mul.z, };
+	muVecScale(color, &mul, 255.0f);
+	GXColor res = { 0xFF, mul.x, mul.y, mul.z };
 	return res;
 }

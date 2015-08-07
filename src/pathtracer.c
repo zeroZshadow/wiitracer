@@ -59,10 +59,11 @@ void PATH_destroy(pathtracer_t* tracer) {
 
 void PATH_generateRays(pathtracer_t* tracer) {
 	camera_t* camera = &tracer->camera;
-	guVector delta;
-	muVecSub(&camera->point1, &camera->point0, &delta);
 	const u16 RayHCount = tracer->hrayCount;
 	const u16 RayVCount = tracer->vrayCount;
+
+	guVector delta;
+	muVecSub(&camera->point1, &camera->point0, &delta);
 
 	// Create all ray data as identity
 	const f32 HBlock = delta.y / (f32)RayVCount;
@@ -77,19 +78,19 @@ void PATH_generateRays(pathtracer_t* tracer) {
 			for (iy = 0; iy < TILESIZE; ++iy) {
 				for (ix = 0; ix < TILESIZE; ++ix) {
 					// Calculate direction
-					guVector rpos = {
-						VBlock * ( (float)(x + ix) + fioraRand()),
-						HBlock * ( (float)(y + iy) + fioraRand()),
-						0
-					};
-					guVector* direction = &tracer->rays[i].direction;
+					guVector rpos;
+					rpos.x = VBlock * ((float)(x + ix) + 0.5f );
+					rpos.y = HBlock * ((float)(y + iy) + 0.5f );
+					rpos.z = 0;
 
 					// Calculate direction
-					muVecAdd(&rpos, &camera->point0, direction);
-					muVecSub(direction, &camera->position, direction);
-					muVecNormalize(direction);
+					guVector direction;
+					muVecAdd(&rpos, &camera->point0, &direction);
+					muVecSub(&direction, &camera->position, &direction);
+					guVecNormalize(&direction);
 
 					// Set Ray origin
+					tracer->rays[i].direction = direction;
 					tracer->rays[i].origin = camera->position;
 
 					// Next ray
@@ -100,16 +101,16 @@ void PATH_generateRays(pathtracer_t* tracer) {
 	}
 }
 
+GXColor datatile[TILESIZE*TILESIZE];
 void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 	// Since we do not have a massive amount of memory, we have to pathtrace is the tiling order so we only have to store 4*4 pixels of data
 	const u32 RayHCount = tracer->hrayCount;
 	const u32 RayVCount = tracer->vrayCount;
-	GXColor datatile[TILESIZE*TILESIZE];
-
 	const f64 blendvalue = tracer->pass / (tracer->pass + 1.0);
 
 	u16 x, y, ix, iy;
-	u32 i = 0;// , r;
+	u32 i = 0;
+
 	for (y = 0; y < RayVCount; y += TILESIZE) {
 		for (x = 0; x < RayHCount; x += TILESIZE) {
 			//This is a single tile
@@ -119,14 +120,11 @@ void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
 					ray_t* ray = &tracer->rays[i];
 					guVector pixel = tracer->fbuffer[index];
 
-					// Raytrace same pixel R times
-					//for (r = 0; r < 1; ++r) {
-						//Get pixel color for tile
-						const guVector color = PATH_trace(ray, scene);
+					//Get pixel color for tile
+					const guVector color = PATH_trace(ray, scene);
 
-						//Blend with old pixel
-						pixel = GXU_blendColors(color, pixel, blendvalue);
-					//}
+					//Blend with old pixel
+					pixel = GXU_blendColors(color, pixel, blendvalue);
 
 					//Store pixel back
 					tracer->fbuffer[index] = pixel;

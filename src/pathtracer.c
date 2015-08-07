@@ -87,7 +87,7 @@ void PATH_generateRays(pathtracer_t* tracer) {
 					guVector direction;
 					muVecAdd(&rpos, &camera->point0, &direction);
 					muVecSub(&direction, &camera->position, &direction);
-					guVecNormalize(&direction);
+					muVecNormalize(&direction);
 
 					// Set Ray origin
 					tracer->rays[i].direction = direction;

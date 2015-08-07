@@ -104,7 +104,7 @@ void GXU_createPixelBuffer(u16 width, u16 height) {
 	}
 
 	GX_InitTexObj(screenTexObject, screenBuffer, width, height, GX_TF_RGBA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
-	GX_InitTexObjFilterMode(screenTexObject, GX_LINEAR, GX_LINEAR);
+	GX_InitTexObjFilterMode(screenTexObject, GX_NEAR, GX_NEAR);
 }
 
 void GXU_clearPixelBuffer(u32 color) {

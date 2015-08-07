@@ -81,7 +81,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\camera.h" />
-    <ClInclude Include="include\defines.h" />
     <ClInclude Include="include\gxutils.h" />
     <ClInclude Include="include\hitinfo.h" />
     <ClInclude Include="include\material.h" />

@@ -7,6 +7,8 @@
 #include "ray.h"
 #include "gxutils.h"
 
+#define MAXDEPTH 8
+
 typedef struct {
 	u32 width, height;
 	u32 hrayCount, vrayCount;

@@ -94,9 +94,6 @@
     <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\defines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\pathtracer.h">
       <Filter>Header Files</Filter>
     </ClInclude>

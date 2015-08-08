@@ -5,13 +5,11 @@
 #include "material.h"
 
 typedef struct {
+	f32 distance;
 	material_t material;
 	guVector position;
 	guVector normal;
-	f32 distance;
 	BOOL hit;
 } hitinfo_t;
-
-#define hitcallback(x) void(*x)(hitinfo_t*, hitinfo_t*)
 
 #endif

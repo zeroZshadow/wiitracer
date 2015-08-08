@@ -154,10 +154,10 @@ guVector PATH_trace(ray_t* ray, scene_t* scene) {
 	currentRay.origin = ray->origin;
 	currentRay.direction = ray->direction;
 
-	u8 depth;
+	u8 depth, i;
+	hitinfo_t hitinfo;
+	hitinfo.material.color = black;
 	for (depth = 0; depth < MAXDEPTH; ++depth) {
-		u8 i;
-		hitinfo_t hitinfo;
 		hitinfo.distance = INFINITY;
 		hitinfo.hit = FALSE;
 
@@ -168,14 +168,11 @@ guVector PATH_trace(ray_t* ray, scene_t* scene) {
 			SPHERE_raycast(&scene->spheres[i], &currentRay, &hitinfo);
 		}
 
-		if (hitinfo.hit == FALSE) {
-			//Nothing was hit, eary out
-			return black;
-		}
-
 		// Alter the current color
 		muVecScale(&hitinfo.material.color, &hitinfo.material.color, cost);
 		muVecMulVec(&color, &hitinfo.material.color, &color);
+
+		if (muVecSum(&color) == 0.0f) return black;
 
 		if (hitinfo.material.emissive > 0.0f) {
 			muVecScale(&color, &color, hitinfo.material.emissive);

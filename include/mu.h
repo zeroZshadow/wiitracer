@@ -90,7 +90,6 @@ static inline void muVecInvert(guVector *src, guVector *dst) {
 	);
 }
 
-//TODO: Wasting a register on NrmData adress, find out how to use directly from memory!
 static inline void muVecNormalize(guVector *v) {
 	register f32 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9;
 	asm volatile(
@@ -337,5 +336,10 @@ static inline void muVecMulVec(guVector *a, guVector *b, guVector *dst) {
 		: [a] "r"(a), [b] "r"(b)
 	);
 }
+
+static inline f32 muVecSum(guVector *a) {
+	return a->x + a->y + a->z;
+}
+
 
 #endif

@@ -74,10 +74,14 @@ int main() { //int argc, char **argv) {
 		// Generate rays
 		PATH_generateRays(tracer);
 
+		//TODO: LOCK UNTILL GX IS READY
+		//GX_WaitDrawDone();
+
 		// Draw rays
 		PATH_draw(tracer, scene);
 
 		// Render buffer to screen
+		//TODO: Throw this on a thread
 		GXU_renderPixelBuffer();
 		GXU_done();
 	}

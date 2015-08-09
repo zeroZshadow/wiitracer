@@ -24,10 +24,6 @@ void GXU_init() {
 	/* Get render mode */
 	rmode = VIDEO_GetPreferredMode(NULL);
 
-	/* Allocate the fifo buffer */
-	gpfifo = memalign(32, DEFAULT_FIFO_SIZE);
-	memset(gpfifo, 0, DEFAULT_FIFO_SIZE);
-
 	/* Allocate frame buffers */
 	xfb[0] = SYS_AllocateFramebuffer(rmode);
 	xfb[1] = SYS_AllocateFramebuffer(rmode);
@@ -38,16 +34,19 @@ void GXU_init() {
 	VIDEO_Flush();
 	VIDEO_WaitVSync();
 	if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
+	else while (VIDEO_GetNextField())   VIDEO_WaitVSync();
 
 	/* Swap frames */
 	fbi ^= 1;
 
 	/* Init flipper */
+	gpfifo = MEM_K0_TO_K1(memalign(32, DEFAULT_FIFO_SIZE));
+	memset(gpfifo, 0, DEFAULT_FIFO_SIZE);
 	GX_Init(gpfifo, DEFAULT_FIFO_SIZE);
 
 	/* Clear the background to black and clear the Z buf */
 	GXColor background = { 0xa0, 0xe0, 0xf0, 0xff };
-	GX_SetCopyClear(background, 0x00ffffff);
+	GX_SetCopyClear(background, GX_MAX_Z24);
 
 	f32 yscale = GX_GetYScaleFactor(rmode->efbHeight, rmode->xfbHeight);
 	u32 xfbHeight = GX_SetDispCopyYScale(yscale);

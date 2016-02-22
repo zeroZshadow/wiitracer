@@ -14,33 +14,42 @@ void *screenBuffer = NULL;
 GXTexObj* screenTexObject = NULL;
 u16 screenWidth, screenHeight;
 u32 fbi = 0;
-GXRModeObj *rmode = NULL;
+GXRModeObj *vmode = NULL;
 BOOL first_frame = FALSE;
 void *gpfifo = NULL;
 
 void GXU_init() {
 	VIDEO_Init();
 
-	/* Get render mode */
-	rmode = VIDEO_GetPreferredMode(NULL);
+	/* Get render mode AND configure */
+	vmode = VIDEO_GetPreferredMode(&TVPal528Int);// &TVPal528Int;// VIDEO_GetPreferredMode(NULL);
+	VIDEO_Configure(vmode);
 
 	/* Allocate frame buffers */
-	xfb[0] = SYS_AllocateFramebuffer(rmode);
-	xfb[1] = SYS_AllocateFramebuffer(rmode);
+	xfb[0] = (u32 *)MEM_K0_TO_K1(SYS_AllocateFramebuffer(vmode));
+	xfb[1] = (u32 *)MEM_K0_TO_K1(SYS_AllocateFramebuffer(vmode));
 
-	VIDEO_Configure(rmode);
+	/* Clean buffers */
+	VIDEO_ClearFrameBuffer(vmode, xfb[0], COLOR_BLACK);
+	VIDEO_ClearFrameBuffer(vmode, xfb[1], COLOR_BLACK);
 	VIDEO_SetNextFramebuffer(xfb[fbi]);
-	VIDEO_SetBlack(FALSE);
+
+	/* Flush, and vsync once*/
 	VIDEO_Flush();
 	VIDEO_WaitVSync();
-	if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
-	else while (VIDEO_GetNextField())   VIDEO_WaitVSync();
+
+	/* If not interlaced, VSync again*/
+	if (vmode->viTVMode & VI_NON_INTERLACE) {
+		VIDEO_WaitVSync();
+	} else while (VIDEO_GetNextField()) {
+		VIDEO_WaitVSync();
+	}
 
 	/* Swap frames */
 	fbi ^= 1;
 
 	/* Init flipper */
-	gpfifo = MEM_K0_TO_K1(memalign(32, DEFAULT_FIFO_SIZE));
+	gpfifo = memalign(32, DEFAULT_FIFO_SIZE);
 	memset(gpfifo, 0, DEFAULT_FIFO_SIZE);
 	GX_Init(gpfifo, DEFAULT_FIFO_SIZE);
 
@@ -48,22 +57,26 @@ void GXU_init() {
 	GXColor background = { 0xa0, 0xe0, 0xf0, 0xff };
 	GX_SetCopyClear(background, GX_MAX_Z24);
 
-	f32 yscale = GX_GetYScaleFactor(rmode->efbHeight, rmode->xfbHeight);
-	u32 xfbHeight = GX_SetDispCopyYScale(yscale);
-	GX_SetScissor(0, 0, rmode->fbWidth, rmode->efbHeight);
-	GX_SetDispCopySrc(0, 0, rmode->fbWidth, rmode->efbHeight);
-	GX_SetDispCopyDst(rmode->fbWidth, xfbHeight);
-	GX_SetCopyFilter(rmode->aa, rmode->sample_pattern, GX_TRUE, rmode->vfilter);
-	GX_SetFieldMode(rmode->field_rendering, ((rmode->viHeight == 2 * rmode->xfbHeight) ? GX_ENABLE : GX_DISABLE));
-
-	GX_SetPixelFmt(rmode->aa ? GX_PF_RGB565_Z16 : GX_PF_RGB8_Z24, GX_ZC_LINEAR);
-
+	/* Culling and copy gamma settings*/
 	GX_SetCullMode(GX_CULL_NONE);
-	GX_CopyDisp(xfb[fbi], GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 
-	GX_SetViewport(0, 0, rmode->fbWidth, rmode->efbHeight, 0, 1);
+	/* Display render settings */
+	f32 yscale = GX_GetYScaleFactor(vmode->efbHeight, vmode->xfbHeight);
+	u32 xfbHeight = GX_SetDispCopyYScale(yscale);
+	GX_SetScissor(0, 0, vmode->fbWidth, vmode->efbHeight);
+	GX_SetDispCopySrc(0, 0, vmode->fbWidth, vmode->efbHeight);
+	GX_SetDispCopyDst(vmode->fbWidth, xfbHeight);
+	GX_SetCopyFilter(vmode->aa, vmode->sample_pattern, GX_TRUE, vmode->vfilter);
+	GX_SetFieldMode(vmode->field_rendering, ((vmode->viHeight == 2 * vmode->xfbHeight) ? GX_ENABLE : GX_DISABLE));
 
+	/* Pixel format */
+	GX_SetPixelFmt(vmode->aa ? GX_PF_RGB565_Z16 : GX_PF_RGB8_Z24, GX_ZC_LINEAR);
+
+	/* Set viewporty */
+	GX_SetViewport(0, 0, vmode->fbWidth, vmode->efbHeight, 0, 1);
+
+	/* Create perspective matrix*/
 	Mtx44 perspective;
 	guOrtho(perspective, 0, 1, 0, 1, 0, 300);
 	GX_LoadProjectionMtx(perspective, GX_ORTHOGRAPHIC);
@@ -200,7 +213,7 @@ void GXU_done() {
 }
 
 GXRModeObj* GXU_getMode() {
-	return rmode;
+	return vmode;
 }
 
 void GXU_blendColors(guVector* c1, guVector* c2, guVector* result, f32 blend) {

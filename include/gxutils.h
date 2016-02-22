@@ -12,7 +12,7 @@
 /* GX vars */
 extern void *screenBuffer;
 extern GXTexObj* screenTexObject;
-extern GXRModeObj *rmode;
+extern GXRModeObj *vmode;
 
 /*! \brief Initialize the GX subsystem
  */

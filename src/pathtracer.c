@@ -104,8 +104,9 @@ void PATH_generateRays(pathtracer_t* tracer) {
 	}
 }
 
-GXColor datatile[TILESIZE*TILESIZE];
 void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
+	GXColor datatile[TILESIZE*TILESIZE];
+
 	// Since we do not have a massive amount of memory, we have to pathtrace is the tiling order so we only have to store 4*4 pixels of data
 	const u32 RayHCount = tracer->hrayCount;
 	const u32 RayVCount = tracer->vrayCount;

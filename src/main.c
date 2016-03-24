@@ -74,16 +74,24 @@ int main() { //int argc, char **argv) {
 		// Generate rays
 		PATH_generateRays(tracer);
 
-		//TODO: LOCK UNTILL GX IS READY
-		//GX_WaitDrawDone();
+		const u32 RayHCount = tracer->hrayCount;
+		const u32 RayVCount = tracer->vrayCount;
+		u16 x, y;
+		u32 i = 0;
 
-		// Draw rays
-		PATH_draw(tracer, scene);
+		for (y = 0; y < RayVCount; y += TILESIZE) {
+			for (x = 0; x < RayHCount; x += TILESIZE) {
+				// Draw rays
+				i = PATH_draw(tracer, scene, x, y, i);
+			}
 
-		// Render buffer to screen
-		//TODO: Throw this on a thread
-		GXU_renderPixelBuffer();
-		GXU_done();
+			// Render buffer to screen
+			//TODO: Throw this on a thread
+			GXU_renderPixelBuffer();
+			GXU_done();
+		}
+
+		tracer->pass += 1.0;
 	}
 
 	SCENE_destroy(scene);

@@ -104,47 +104,41 @@ void PATH_generateRays(pathtracer_t* tracer) {
 	}
 }
 
-void PATH_draw(pathtracer_t* tracer, scene_t* scene) {
+u32 PATH_draw(pathtracer_t* tracer, scene_t* scene, u16 x, u16 y, u32 i) {
 	GXColor datatile[TILESIZE*TILESIZE];
 
 	// Since we do not have a massive amount of memory, we have to pathtrace is the tiling order so we only have to store 4*4 pixels of data
 	const u32 RayHCount = tracer->hrayCount;
-	const u32 RayVCount = tracer->vrayCount;
 	const f64 blendvalue = tracer->pass / (tracer->pass + 1.0);
 
-	u16 x, y, ix, iy;
-	u32 i = 0;
+	u16 ix, iy;
 
-	for (y = 0; y < RayVCount; y += TILESIZE) {
-		for (x = 0; x < RayHCount; x += TILESIZE) {
-			//This is a single tile
-			for (iy = 0; iy < TILESIZE; ++iy) {
-				for (ix = 0; ix < TILESIZE; ++ix) {
-					const u32 index = (x + ix) + ((y + iy) * RayHCount);
-					ray_t* ray = &tracer->rays[i];
-					guVector* pixel = &tracer->fbuffer[index];
+	//This is a single tile
+	for (iy = 0; iy < TILESIZE; ++iy) {
+		for (ix = 0; ix < TILESIZE; ++ix) {
+			const u32 index = (x + ix) + ((y + iy) * RayHCount);
+			ray_t* ray = &tracer->rays[i];
+			guVector* pixel = &tracer->fbuffer[index];
 
-					//Get pixel color for tile
-					guVector color = PATH_trace(ray, scene);
+			//Get pixel color for tile
+			guVector color = PATH_trace(ray, scene);
 
-					//Blend with old pixel
-					GXU_blendColors(&color, pixel, pixel, blendvalue);
+			//Blend with old pixel
+			GXU_blendColors(&color, pixel, pixel, blendvalue);
 
-					//Convert to u32
-					//TODO: WRITE CLAMP IN PSQ
-					guVecMax(pixel, 1.0f);
-					guVecMin(pixel, 0.0f);
-					datatile[ix + (iy * TILESIZE)] = GXU_vectorToColorData(pixel);
-					++i;
-				}
-			}
-
-			//Entire tile traced, write to texture
-			GXU_copyTilePixelBuffer(datatile, x / TILESIZE, y / TILESIZE);
+			//Convert to u32
+			//TODO: WRITE CLAMP IN PSQ
+			guVecMax(pixel, 1.0f);
+			guVecMin(pixel, 0.0f);
+			datatile[ix + (iy * TILESIZE)] = GXU_vectorToColorData(pixel);
+			++i;
 		}
 	}
 
-	tracer->pass += 1.0;
+	//Entire tile traced, write to texture
+	GXU_copyTilePixelBuffer(datatile, x / TILESIZE, y / TILESIZE);
+
+	return i;
 }
 
 const guVector black = { 0, 0, 0 };

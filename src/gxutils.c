@@ -22,7 +22,7 @@ void GXU_init() {
 	VIDEO_Init();
 
 	/* Get render mode AND configure */
-	vmode = VIDEO_GetPreferredMode(&TVPal528Int);// &TVPal528Int;// VIDEO_GetPreferredMode(NULL);
+	vmode = VIDEO_GetPreferredMode(&TVPal528Int);
 	VIDEO_Configure(vmode);
 
 	/* Allocate frame buffers */

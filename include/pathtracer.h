@@ -27,7 +27,7 @@ void PATH_destroy(pathtracer_t* tracer);
 
 void PATH_generateRays(pathtracer_t* tracer);
 
-void PATH_draw(pathtracer_t* tracer, scene_t* scene);
+u32 PATH_draw(pathtracer_t* tracer, scene_t* scene, u16 x, u16 y, u32 i);
 
 guVector PATH_trace(ray_t* path, scene_t* scene);
 

@@ -31,7 +31,7 @@ TEXTURES	:=	textures
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS		= -g -O3 -Wall -Winline -Wextra $(MACHDEP) $(INCLUDE)
+CFLAGS		= -g -Ofast -Wall -Winline -ffast-math -mpaired -mmultiple -Wextra $(MACHDEP) $(INCLUDE)
 CXXFLAGS	= $(CFLAGS)
 
 LDFLAGS		= -g $(MACHDEP) -Wl,-Map,$(notdir $@).map
